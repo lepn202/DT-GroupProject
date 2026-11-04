@@ -8,13 +8,13 @@
 
 Today, rental housing maintenance only happens after something goes wrong. Tenants email, wait, and never know when someone will come. Landlords get unstructured reports and only notice damage once it is expensive to fix. We give each flat a "nervous system" of IoT sensors (simulated in the prototype) and add an AI layer that **detects** problems early, **asks the tenant to confirm**, **turns** a photo, video or voice report into a structured ticket, **groups** related issues across flats, and **acts**: it prioritises the ticket, books the right trade, and keeps everyone informed.
 
-The research behind this is in [`evidence.md`](evidence.md) (Issues 1–12), and the metrics we judge it by are in [`success-matrix.md`](success-matrix.md). What the evidence asks of the design:
+The research behind this is in [`evidence.md`](evidence.md) (Issues 1–12). What the evidence asks of the design:
 
 | Evidence | Design decision | Where |
 |---|---|---|
 | Damp/mould is the #1 defect; leaks the #3 (Issue 1). Plumbing and HVAC are the biggest request categories (Issue 8) | Humidity, temperature, valve and leak sensors; a mould-risk rule | §5.1, §5.2 |
 | Tenants hesitate to complain (Issue 6) | The system asks first ("Is it cold?"); reporting by photo, video or voice, no forms | §5.3 |
-| No acknowledgement, constant chasing (Issue 3) | An instant reply with urgency and next step; a live status timeline; "status?" questions are logged | §5.3, §10 |
+| No acknowledgement, constant chasing (Issue 3) | An instant reply with urgency and next step; a live status timeline; "status?" questions are logged | §5.3 |
 | The same communal fault is reported many times (Issue 5) | Sensor anomalies **and** tenant reports join one incident; every affected flat is told | §5.2, §5.5 |
 | Up to 20% of appointments missed, mostly because the tenant didn't know (Issue 4) | Confirmed slots, reminders, "I'll be home" confirmation, visit outcome recorded | §5.7 |
 | Most delay is coordination, not repair (Issues 9, 10) | In-app booking with optional auto-approve | §5.7 |
@@ -137,9 +137,9 @@ Each anomaly stores the evidence behind it (readings + rule name). The tenant pr
 ### 5.3 Tenant app ("Tenant confirms" / "Tenant reports")
 
 - **Confirm** (sensor-initiated): *"Your living room has been at 15 °C for 6 h with the heating on. Is it cold?"* → **Yes / No / Add photo**. *No* closes the anomaly as a false alarm. If there is no answer, `high` and `critical` issues are escalated anyway.
-- **Report** (tenant-initiated): take a photo or a short video, and optionally add a note by typing or speaking. No forms. Target: under 60 seconds from opening the app (success matrix T5).
-- **Instant acknowledgement:** within a minute of submitting, the tenant sees what the system understood (category, urgency) and the next step ("A plumber will be booked within 24 hours"), or the quick-fix chat (§5.6). Nothing waits on a person to say "received" (T8).
-- **Status timeline** per ticket (received → classified → booked → resolved), updated live, with the next step and its expected time always shown, so the answer to "what's happening?" is on screen before anyone asks (evidence Issue 3). A tenant who still asks, in the chat or with the "any update?" button, gets an answer from the ticket's data, and the question is logged as a `status_query` event (T19).
+- **Report** (tenant-initiated): take a photo or a short video, and optionally add a note by typing or speaking. No forms. Target: under 60 seconds from opening the app.
+- **Instant acknowledgement:** within a minute of submitting, the tenant sees what the system understood (category, urgency) and the next step ("A plumber will be booked within 24 hours"), or the quick-fix chat (§5.6). Nothing waits on a person to say "received".
+- **Status timeline** per ticket (received → classified → booked → resolved), updated live, with the next step and its expected time always shown, so the answer to "what's happening?" is on screen before anyone asks (evidence Issue 3). A tenant who still asks, in the chat or with the "any update?" button, gets an answer from the ticket's data, and the question is logged as a `status_query` event.
 
 ### 5.4 Media handling ("Add details")
 
@@ -224,7 +224,7 @@ Scheduling happens **entirely inside the app**. There is no external calendar.
 
 - Once booked, **all tenants of the flat** are notified (time window, room, whether access is needed), and the technician sees the job.
 - **Reminders** go out the evening before and an hour before the slot. The tenant answers "I'll be home", "Someone else will let them in" or "Reschedule"; a reschedule goes back to the scheduler instead of becoming a missed visit (evidence Issue 4: 80% of missed appointments are a tenant who didn't know or wasn't home).
-- **Visit outcome:** the technician closes each visit as `completed`, `needs_follow_up` (parts, second visit) or `no_access`. A `no_access` visit is rebooked at once and counts against the missed-appointment rate (T13, L13).
+- **Visit outcome:** the technician closes each visit as `completed`, `needs_follow_up` (parts, second visit) or `no_access`. A `no_access` visit is rebooked at once and counts against the missed-appointment rate.
 - **Technician view:** job list with photos, ticket summary and sensor evidence, plus "on my way" / "done + photo" buttons.
 
 ### 5.8 Dashboard (landlord & maintenance)
@@ -235,7 +235,7 @@ Scheduling happens **entirely inside the app**. There is no external calendar.
 - **Sensor charts** per room.
 - **Due times:** every ticket gets `due_at` from its urgency, using the UK's median repair targets as the default: 24 hours for `critical`/`high`, 28 days for `medium`/`low` (evidence Issue 12). The board sorts by it and marks tickets close to or past it.
 - **Settings:** the approval mode from §5.7, and the target times.
-- **Headline metrics:** the two north stars from the success matrix (tickets resolved on time without the tenant chasing; tickets handled without manual coordination), plus issues caught by sensors before any tenant reported them (L1). How each is computed is in §10.
+- **Headline metrics:** tickets resolved on time without the tenant chasing, tickets handled without manual coordination, and issues caught by sensors before any tenant reported them.
 
 ## 6. Data model (core tables)
 
@@ -263,7 +263,7 @@ erDiagram
 | `buildings`, `units`, `rooms` | Including `floor` (used for grouping) |
 | `devices`, `sensor_readings` | `type`, `room_id`; readings are `device_id`, `ts`, `metric`, `value` |
 | `anomalies`, `incidents` | `rule`, `severity`, `evidence jsonb`, `tenant_confirmation`, `incident_id` |
-| `reports` | Note (typed or dictated), `note_source` (`typed` / `voice`), media paths, extracted frames, `started_at` / `submitted_at` (for T5, T6) |
+| `reports` | Note (typed or dictated), `note_source` (`typed` / `voice`), media paths, extracted frames, `started_at` / `submitted_at` |
 | `tickets` | Classification fields, `summary`, `status`, `source` (`sensor` / `tenant` / `chat`), `classified_by` (`jev` / `claude` / `landlord`), `due_at`, `acknowledged_at`, `resolved_at` |
 | `ticket_events` | Timeline entries, each with a `type` and an `actor`. Types include `status_query` (the tenant asked for an update), `label_corrected` (someone changed the AI's category or urgency, with old and new value) and `manual_contact` (the landlord called or messaged someone by hand) |
 | `technicians`, `availability`, `appointments` | In-app scheduling, `approved_by`, `tenant_confirmation` (`home` / `someone_else` / `reschedule`), `outcome` (`completed` / `needs_follow_up` / `no_access`) |
@@ -313,8 +313,7 @@ sequenceDiagram
 ├─ tools/
 │  └─ sensor-sim/   # Simulator with fault scenarios
 ├─ architecture.md
-├─ evidence.md        # research: tenant and landlord issues 1–12
-└─ success-matrix.md  # metrics, baselines and targets
+└─ evidence.md      # research: tenant and landlord issues 1–12
 ```
 
 ## 9. Basic security & privacy
@@ -325,30 +324,7 @@ sequenceDiagram
 - Only the minimum context is sent to Jev and Claude (no names or contact details).
 - All demo data is fake.
 
-## 10. Measuring success
-
-The success matrix only means something if the system records what it needs. Most of it falls out of timestamps and events the app writes anyway:
-
-| Metric | Computed from |
-|---|---|
-| Tenant north star: resolved on time without chasing | Tickets with `resolved_at ≤ due_at` and no `status_query` event |
-| Landlord north star: handled without manual coordination | Tickets with no `manual_contact` event and no landlord event other than an approval |
-| T1 / L1 proactive detection | `tickets.source = 'sensor'`, or an anomaly opened before the first tenant report on the same incident |
-| T2, T3 / L3 confirmations and false alarms | `anomalies.tenant_confirmation` |
-| T5, T6 time to report, completion | `reports.started_at`, `submitted_at`, and reports started but never submitted |
-| T8 instant acknowledgement | `acknowledged_at − created_at` |
-| T9 / L8, L9 label accuracy | Share of tickets with a `label_corrected` event, split by field |
-| T10 / L10 quick fixes | Chats that end in `mark_resolved` with no ticket |
-| T12 / L11 time to booking | First appointment's confirmation time − ticket creation |
-| T13 / L13 missed appointments | `appointments.outcome = 'no_access'` |
-| T15 / L7 duplicates | Reports attached to an existing incident |
-| T16 / L15, L16, L19 resolution and on-target | `resolved_at`, `due_at` |
-| T17, T18 / L17 first-time fix | Tickets with exactly one `completed` visit and no `needs_follow_up` |
-| T19 chasing | `status_query` events per ticket |
-
-Survey metrics (T11, T20–T23, L20–L24) are asked in the usability tests and the pilot, not computed. With simulated sensors and fake data, the prototype can only demonstrate the computed ones; the matrix lists which belong to a later pilot.
-
-## 11. Build plan
+## 10. Build plan
 
 | Step | Goal |
 |---|---|
@@ -356,4 +332,4 @@ Survey metrics (T11, T20–T23, L20–L24) are asked in the usability tests and 
 | 2 | Tenant reports (photo/video/voice/note) → Jev classification → instant acknowledgement → ticket board with due times |
 | 3 | Anomaly rules, tenant confirmation, incident grouping (sensor and tenant reports), building notices |
 | 4 | In-app scheduling, approval setting, roommate notifications, reminders, technician view with visit outcomes |
-| 5 | Quick-fix chatbot, sensor-verified resolution, success-metric queries (§10) on the dashboard, demo script |
+| 5 | Quick-fix chatbot, sensor-verified resolution, headline metrics on the dashboard, demo script |
