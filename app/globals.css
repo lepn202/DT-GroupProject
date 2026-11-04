@@ -12,6 +12,7 @@
   --primary-hover: #0a4a3d;
   --primary-soft: #dcefe9;
   --primary-foreground: #ffffff;
+  --signal: #ea7a2e; /* logo signal dot only, never a status colour */
 
   --emergency: #b42318;
   --emergency-tint: #fde8e6;
@@ -43,6 +44,7 @@
   --color-primary-hover: var(--primary-hover);
   --color-primary-soft: var(--primary-soft);
   --color-primary-foreground: var(--primary-foreground);
+  --color-signal: var(--signal);
   --color-emergency: var(--emergency);
   --color-emergency-tint: var(--emergency-tint);
   --color-emergency-text: var(--emergency-text);

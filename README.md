@@ -1,4 +1,4 @@
-# [PRODUCT NAME]: building operations MVP
+# Fixa: building operations MVP
 
 AI-first building operations for rental housing. What we build and why: [`product.md`](product.md). How: [`architecture.md`](architecture.md). Research: [`evidence.md`](evidence.md). Design: [`design/design-system.md`](design/design-system.md).
 

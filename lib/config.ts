@@ -1,2 +1,2 @@
-// Working name until the product is named (design/design-system.md, "Open points").
-export const APP_NAME = "[PRODUCT NAME]";
+// Product name. Logo: components/logo.tsx, design/brand/.
+export const APP_NAME = "Fixa";

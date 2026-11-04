@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { Archive, Building2, LayoutGrid, LogOut, Menu, Plus, Settings, X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { FixaLockup } from "@/components/logo";
 
 type Props = {
   appName: string;
@@ -38,8 +39,8 @@ export function Sidebar({ appName, landlordName, mode, buildings, signOut }: Pro
   return (
     <aside className="border-b border-border bg-card lg:sticky lg:top-0 lg:h-dvh lg:w-64 lg:shrink-0 lg:border-r lg:border-b-0">
       <div className="flex items-center justify-between px-4 py-4 lg:px-5 lg:py-6">
-        <Link href="/dashboard" className="font-bold tracking-tight">
-          {appName}
+        <Link href="/dashboard" aria-label={`${appName} home`}>
+          <FixaLockup />
         </Link>
         <button className="flex size-11 items-center justify-center rounded-md lg:hidden" onClick={() => setOpen((o) => !o)} aria-label={open ? "Close menu" : "Open menu"} aria-expanded={open}>
           {open ? <X className="size-5" aria-hidden /> : <Menu className="size-5" aria-hidden />}
