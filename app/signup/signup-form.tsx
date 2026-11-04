@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
-import { ErrorNote, Field, Input } from "@/components/ui";
+import { ErrorNote, Notice, Field, Input } from "@/components/ui";
 import { SubmitButton } from "@/components/submit-button";
 import { signUpLandlord } from "@/lib/actions/auth";
 
@@ -19,6 +19,7 @@ export function SignUpForm() {
         <Input name="password" type="password" autoComplete="new-password" minLength={8} required />
       </Field>
       <ErrorNote>{state?.error}</ErrorNote>
+      <Notice>{state?.notice}</Notice>
       <SubmitButton pendingText="Creating account…">Create account</SubmitButton>
     </form>
   );

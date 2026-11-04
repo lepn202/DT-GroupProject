@@ -64,3 +64,12 @@ export function ErrorNote({ children }: { children: React.ReactNode }) {
 export function SectionLabel({ className, ...props }: ComponentProps<"h2">) {
   return <h2 className={cn("label-caps text-muted-foreground", className)} {...props} />;
 }
+
+export function Notice({ children }: { children: React.ReactNode }) {
+  if (!children) return null;
+  return (
+    <p role="status" className="rounded-md bg-primary-soft px-3 py-2 text-sm text-primary-hover">
+      {children}
+    </p>
+  );
+}

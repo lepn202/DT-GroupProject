@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
-import { ErrorNote, Field, Input, Select } from "@/components/ui";
+import { ErrorNote, Notice, Field, Input, Select } from "@/components/ui";
 import { SubmitButton } from "@/components/submit-button";
 import { joinBuilding } from "@/lib/actions/auth";
 
@@ -35,6 +35,7 @@ export function JoinForm({ code, units }: { code: string; units: { id: string; n
         <Input name="password" type="password" autoComplete="new-password" minLength={8} required />
       </Field>
       <ErrorNote>{state?.error}</ErrorNote>
+      <Notice>{state?.notice}</Notice>
       <SubmitButton pendingText="Creating account…">Create account</SubmitButton>
     </form>
   );
