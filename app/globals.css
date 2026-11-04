@@ -1,0 +1,82 @@
+@import "tailwindcss";
+
+/* Tokens from design/design-system.md (draft v0.1), named to match shadcn/ui. Light only for now. */
+:root {
+  --background: #f6f6f2;
+  --card: #ffffff;
+  --muted: #edede6;
+  --border: #dadad2;
+  --muted-foreground: #4e5a55;
+  --foreground: #16201c;
+  --primary: #0e5e4e;
+  --primary-hover: #0a4a3d;
+  --primary-soft: #dcefe9;
+  --primary-foreground: #ffffff;
+
+  --emergency: #b42318;
+  --emergency-tint: #fde8e6;
+  --emergency-text: #9a1c12;
+  --high: #c4570a;
+  --high-tint: #fdeedc;
+  --high-text: #8f3e06;
+  --medium: #e3b341;
+  --medium-tint: #fbf1d3;
+  --medium-text: #6e5100;
+  --low: #b7bec8;
+  --low-tint: #eef0f3;
+  --low-text: #475467;
+
+  --stage-logged: #4e5a55;
+  --stage-booked: #8fa8e8;
+  --stage-booked-tint: #dce6fb;
+  --stage-progress: #1f4fbf;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-card: var(--card);
+  --color-muted: var(--muted);
+  --color-border: var(--border);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-soft: var(--primary-soft);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-emergency: var(--emergency);
+  --color-emergency-tint: var(--emergency-tint);
+  --color-emergency-text: var(--emergency-text);
+  --color-high: var(--high);
+  --color-high-tint: var(--high-tint);
+  --color-high-text: var(--high-text);
+  --color-medium: var(--medium);
+  --color-medium-tint: var(--medium-tint);
+  --color-medium-text: var(--medium-text);
+  --color-low: var(--low);
+  --color-low-tint: var(--low-tint);
+  --color-low-text: var(--low-text);
+  --color-stage-logged: var(--stage-logged);
+  --color-stage-booked: var(--stage-booked);
+  --color-stage-booked-tint: var(--stage-booked-tint);
+  --color-stage-progress: var(--stage-progress);
+
+  --font-sans: var(--font-hanken), system-ui, sans-serif;
+  --font-mono: var(--font-plex-mono), ui-monospace, monospace;
+
+  --shadow-1: 0 1px 2px rgba(22, 32, 28, 0.06), 0 4px 12px rgba(22, 32, 28, 0.08);
+  --shadow-2: 0 8px 28px rgba(22, 32, 28, 0.16);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+}
+
+/* Label style: 12/16, 600, uppercase, 0.06em */
+@utility label-caps {
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
