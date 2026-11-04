@@ -26,7 +26,7 @@ export async function proxy(request: NextRequest) {
   const { data } = await supabase.auth.getClaims();
   const signedIn = Boolean(data?.claims);
   const path = request.nextUrl.pathname;
-  const isProtected = path === "/app" || path.startsWith("/app/") || path.startsWith("/dashboard");
+  const isProtected = path === "/app" || path.startsWith("/app/") || path.startsWith("/dashboard") || path.startsWith("/demo");
 
   if (!signedIn && isProtected) {
     const url = request.nextUrl.clone();

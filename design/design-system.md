@@ -1,4 +1,4 @@
-# Design System (draft v0.1)
+# Fixa design system (draft v0.1)
 
 The draft design system for the web app MVP, based on [`product.md`](../product.md), [`evidence.md`](../evidence.md) and [`architecture.md`](../architecture.md).
 
@@ -12,6 +12,25 @@ The draft design system for the web app MVP, based on [`product.md`](../product.
 | `TenantHome.dc.html` | Tenant app, Home (390 × 844) |
 | `TenantReport.dc.html` | Tenant app, Add ticket (390 × 844) |
 | `Dashboard.dc.html` | Landlord dashboard, building view (fluid page) |
+| `Logo.dc.html` | Brand: FIXA logo, variants, app icon, usage |
+
+## Brand: Fixa
+
+**Name:** Fixa, from the Swedish *fixa*, "to fix, to sort out". Write **FIXA** in the logo and **Fixa** in running text. Tagline: *Your building, sorted.*
+
+**Logo:** monoline capitals with round caps and joins. The A has no crossbar: it is a roof, and a **signal dot** sits where the crossbar would be, so the building notices a problem first. The mark is the roof and dot on its own, on a primary tile.
+
+| File | Use |
+|---|---|
+| [`brand/fixa-wordmark.svg`](brand/fixa-wordmark.svg) | Wordmark on light backgrounds |
+| [`brand/fixa-wordmark-white.svg`](brand/fixa-wordmark-white.svg) | Wordmark on primary or dark backgrounds |
+| [`brand/fixa-mark.svg`](brand/fixa-mark.svg) | App icon, favicon, avatar (also `app/icon.svg`) |
+| `components/logo.tsx` | `FixaWordmark`, `FixaMark`, `FixaLockup` React components |
+
+**Rules**
+- Signal colour `--signal: #EA7A2E` is used only for the logo's dot. It means "noticed", never "danger", and is never a status colour.
+- Clear space on every side: 3 × the dot's height. Minimum width: 64 px wordmark, 16 px mark (drop the dot at 16 px).
+- Don't stretch it, outline it, add shadows, or retype the wordmark in a font.
 
 ## Principles
 
@@ -114,6 +133,5 @@ Lucide (ships with shadcn/ui), 1.75 px stroke, 20 px in UI, 24 px in the tenant 
 
 ## Open points
 
-- Product name and logo (shown as `[PRODUCT NAME]`).
 - KPI values are placeholders (`[N]`, `[X.X] d`). No real data yet.
 - Dark mode, the ticket detail screen, the portfolio screen and the technician link page aren't designed yet.

@@ -15,7 +15,18 @@ type Attachment =
   | { kind: "photo"; blob: Blob; preview: string }
   | { kind: "video"; file: File; frames: Blob[]; preview: string };
 
-export function AddTicket({ userId, flat, building }: { userId: string; flat: string; building: string }) {
+export function AddTicket({
+  userId,
+  flat,
+  building,
+  sensorPrompt = null,
+}: {
+  userId: string;
+  flat: string;
+  building: string;
+  /** Set when the tenant tapped "Add photo" on a sensor prompt. */
+  sensorPrompt?: { id: string; question: string } | null;
+}) {
   const router = useRouter();
   const photoInput = useRef<HTMLInputElement>(null);
   const videoInput = useRef<HTMLInputElement>(null);
@@ -145,6 +156,7 @@ export function AddTicket({ userId, flat, building }: { userId: string; flat: st
         transcript: transcript.trim() || null,
         mediaPaths,
         framePaths,
+        sensorEventId: sensorPrompt?.id ?? null,
       });
       if ("error" in result) {
         setError(result.error);
@@ -180,8 +192,10 @@ export function AddTicket({ userId, flat, building }: { userId: string; flat: st
         <span className="text-[13px] text-muted-foreground">
           Flat {flat} · {building}
         </span>
-        <h1 className="text-[28px] leading-[34px] font-bold tracking-[-0.01em]">What&apos;s wrong?</h1>
-        <p className="text-muted-foreground">Show us or tell us. We&apos;ll work out the rest, no forms.</p>
+        <h1 className="text-[28px] leading-[34px] font-bold tracking-[-0.01em]">{sensorPrompt ? sensorPrompt.question : <>What&apos;s wrong?</>}</h1>
+        <p className="text-muted-foreground">
+          {sensorPrompt ? "Add a photo to confirm. Sending it counts as “Yes”." : <>Show us or tell us. We&apos;ll work out the rest, no forms.</>}
+        </p>
       </header>
 
       <input ref={photoInput} type="file" accept="image/*" capture="environment" className="sr-only" onChange={(e) => onPhoto(e.target.files)} />

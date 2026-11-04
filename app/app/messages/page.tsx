@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ChevronRight, Megaphone } from "lucide-react";
+import { Bot, ChevronRight, Megaphone } from "lucide-react";
 import { IssueIcon } from "@/components/ticket-ui";
 import { Card, SectionLabel } from "@/components/ui";
 import { requireTenant } from "@/lib/auth";
@@ -22,6 +22,19 @@ export default async function MessagesPage() {
   return (
     <>
       <h1 className="text-[28px] leading-[34px] font-bold tracking-[-0.01em]">Messages</h1>
+
+      <Link href="/app/messages/assistant">
+        <Card className="flex items-center gap-3 px-4 py-3.5 hover:border-primary/40">
+          <span className="flex size-10 items-center justify-center rounded-full bg-primary text-primary-foreground">
+            <Bot className="size-5" aria-hidden />
+          </span>
+          <div className="flex min-w-0 flex-1 flex-col">
+            <span className="font-semibold">Ask Fixa</span>
+            <span className="truncate text-sm text-muted-foreground">Quick fixes, “why is my room cold?”, repair status</span>
+          </div>
+          <ChevronRight className="size-4 text-muted-foreground" aria-hidden />
+        </Card>
+      </Link>
 
       <section className="flex flex-col gap-3">
         <SectionLabel>Your tickets</SectionLabel>

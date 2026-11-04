@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 
-type Watch = { table: "tickets" | "messages" | "broadcasts" | "sensor_events"; filter?: string };
+type Watch = { table: "tickets" | "messages" | "broadcasts" | "sensor_events" | "appointments" | "notifications" | "chat_messages"; filter?: string };
 
 /**
  * Re-renders the current page when watched rows change (Supabase Realtime, RLS applies),

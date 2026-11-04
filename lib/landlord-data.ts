@@ -16,10 +16,13 @@ export async function landlordBuildings(): Promise<BuildingRow[]> {
   }));
 }
 
-/** Tickets on the dashboard: everything not yet archived (resolved ones stay until dismissed). */
+/**
+ * Tickets on the dashboard: everything not yet archived (resolved ones stay until dismissed).
+ * Grouped flat tickets are left out: they show as their parent, so six cold flats are one boiler ticket.
+ */
 export async function landlordTickets(buildingId?: string) {
   const supabase = await createClient();
-  let q = supabase.from("tickets").select("*, unit:units(number)").is("archived_at", null);
+  let q = supabase.from("tickets").select("*, unit:units(number)").is("archived_at", null).is("parent_ticket_id", null);
   if (buildingId) q = q.eq("building_id", buildingId);
   const { data } = await q;
   return (data ?? []) as (Ticket & { unit: { number: string } | null })[];

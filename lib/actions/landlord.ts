@@ -8,6 +8,7 @@ import { computeDueAt, ISSUE_TYPES, NEXT_STEPS, SCOPES, TRADES, URGENCIES, type 
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { addEvent, addMessage } from "@/lib/tickets";
+import { demoEnabled } from "@/lib/config";
 
 export type ActionState = { error?: string; ok?: string } | undefined;
 
@@ -160,4 +161,189 @@ export async function updateSettings(_: ActionState, form: FormData): Promise<Ac
   if (error) return { error: error.message };
   revalidatePath("/dashboard", "layout");
   return { ok: "Settings saved. New due times apply to new tickets." };
+}
+
+// ---------------------------------------------------------------- booking (architecture §5.7)
+
+/** "Book now" (emergencies) or the landlord picking a slot: books one of the suggested slots. */
+export async function bookTechnician(ticketId: string, _: ActionState, form: FormData): Promise<ActionState> {
+  const { ticket } = await ownTicket(ticketId);
+  const [technicianId, startsAt, endsAt] = String(form.get("slot") ?? "").split("|");
+  if (!technicianId || !startsAt || !endsAt) return { error: "Pick a technician and a time." };
+  const admin = createAdminClient();
+  // Only technicians this landlord may use: their own or the shared pool.
+  const { data: tech } = await admin.from("technicians").select("id, landlord_id").eq("id", technicianId).is("removed_at", null).maybeSingle();
+  const landlord = await requireLandlord();
+  if (!tech || (tech.landlord_id && tech.landlord_id !== landlord.id)) return { error: "That technician isn't available." };
+  const { bookSlot } = await import("@/lib/scheduling");
+  const result = await bookSlot(admin, ticket.id, { technicianId, starts_at: startsAt, ends_at: endsAt }, { bookedBy: "landlord" });
+  if ("error" in result) return { error: result.error };
+  await admin.from("tickets").update({ landlord_touched: true }).eq("id", ticketId);
+  revalidatePath(`/dashboard/tickets/${ticketId}`);
+  revalidatePath("/dashboard", "layout");
+  return { ok: "Booked. The technician and the tenants have been told." };
+}
+
+/** Manual mode: confirm the proposed appointment as it is. */
+export async function confirmAppointment(ticketId: string, appointmentId: string) {
+  await ownTicket(ticketId);
+  const admin = createAdminClient();
+  const { data: appt } = await admin.from("appointments").select("ticket_id").eq("id", appointmentId).single();
+  if (appt?.ticket_id !== ticketId) return;
+  const { confirmProposed } = await import("@/lib/scheduling");
+  await confirmProposed(admin, appointmentId);
+  await admin.from("tickets").update({ landlord_touched: true }).eq("id", ticketId);
+  revalidatePath(`/dashboard/tickets/${ticketId}`);
+  revalidatePath("/dashboard", "layout");
+}
+
+export async function markLandlordNoticeRead(noticeId: string) {
+  const landlord = await requireLandlord();
+  const admin = createAdminClient();
+  await admin.from("notifications").update({ read_at: new Date().toISOString() }).eq("id", noticeId).eq("landlord_id", landlord.id);
+  revalidatePath("/dashboard", "layout");
+}
+
+// ---------------------------------------------------------------- technicians (architecture §5.8)
+
+const TechnicianForm = z.object({
+  name: z.string().trim().min(2, "Enter a name"),
+  trade: z.enum(["plumber", "heating", "electrician", "handyman"]),
+  email: z.string().trim().email("Enter a valid email"),
+  phone: z.string().trim().min(6, "Enter a phone number"),
+});
+
+/** Weekday 2-hour slots, 08:00–18:00, for the next 14 days: a starting point the technician can change. */
+async function seedSlots(admin: ReturnType<typeof createAdminClient>, technicianId: string) {
+  const { berlinParts, berlinTime } = await import("@/lib/domain");
+  const today = berlinParts(new Date());
+  const rows: { technician_id: string; starts_at: string; ends_at: string }[] = [];
+  for (let d = 1; d <= 14; d++) {
+    const day = berlinTime(today.year, today.month, today.day + d, 12);
+    const weekday = new Intl.DateTimeFormat("en-GB", { weekday: "short", timeZone: "Europe/Berlin" }).format(day);
+    if (weekday === "Sat" || weekday === "Sun") continue;
+    for (const h of [8, 10, 12, 14, 16]) {
+      const start = berlinTime(today.year, today.month, today.day + d, h);
+      rows.push({ technician_id: technicianId, starts_at: start.toISOString(), ends_at: new Date(start.getTime() + 2 * 36e5).toISOString() });
+    }
+  }
+  await admin.from("tech_slots").insert(rows);
+}
+
+export async function addTechnician(_: ActionState, form: FormData): Promise<ActionState> {
+  const landlord = await requireLandlord();
+  const parsed = TechnicianForm.safeParse(Object.fromEntries(form));
+  if (!parsed.success) return { error: parsed.error.issues[0].message };
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("technicians")
+    .insert({ ...parsed.data, landlord_id: landlord.id })
+    .select("id")
+    .single();
+  if (error || !data) return { error: error?.message ?? "Could not add the technician" };
+  const admin = createAdminClient();
+  const { data: tech } = await admin.from("technicians").select("id, email, link_token").eq("id", data.id).single();
+  if (!tech) return { error: "Could not add the technician" };
+  await seedSlots(admin, data.id);
+  const { emailTechnician } = await import("@/lib/notify");
+  await emailTechnician(admin, tech, {
+    kind: "technician_welcome",
+    subject: `${landlord.name} added you as a technician on Fixa`,
+    text: `Hello ${parsed.data.name.split(" ")[0]},\n\n${landlord.name} will book repair visits with you through Fixa. You don't need an account: your page shows your jobs and lets you set when you're available.`,
+  });
+  revalidatePath("/dashboard/technicians");
+  return { ok: "Added. We've emailed them their link." };
+}
+
+export async function updateTechnician(technicianId: string, _: ActionState, form: FormData): Promise<ActionState> {
+  await requireLandlord();
+  const parsed = TechnicianForm.safeParse(Object.fromEntries(form));
+  if (!parsed.success) return { error: parsed.error.issues[0].message };
+  const supabase = await createClient();
+  // RLS: only the landlord's own technicians can be updated.
+  const { error, count } = await supabase.from("technicians").update(parsed.data, { count: "exact" }).eq("id", technicianId);
+  if (error || !count) return { error: error?.message ?? "Could not save" };
+  revalidatePath("/dashboard/technicians");
+  return { ok: "Saved." };
+}
+
+export async function removeTechnician(technicianId: string) {
+  await requireLandlord();
+  const supabase = await createClient();
+  await supabase.from("technicians").update({ removed_at: new Date().toISOString() }).eq("id", technicianId);
+  revalidatePath("/dashboard/technicians");
+}
+
+export async function resendTechnicianLink(technicianId: string) {
+  const landlord = await requireLandlord();
+  const admin = createAdminClient();
+  const { data } = await admin.from("technicians").select("id, name, email, link_token, landlord_id").eq("id", technicianId).is("removed_at", null).maybeSingle();
+  if (!data || data.landlord_id !== landlord.id) return;
+  const { emailTechnician } = await import("@/lib/notify");
+  await emailTechnician(admin, data, {
+    kind: "technician_link",
+    subject: "Your Fixa link",
+    text: `Hello ${data.name.split(" ")[0]},\n\nHere's your link again, from ${landlord.name}.`,
+  });
+  revalidatePath("/dashboard/technicians");
+}
+
+// ---------------------------------------------------------------- quick-fix guides per building (chatbot)
+
+export async function saveQuickFixGuides(_: ActionState, form: FormData): Promise<ActionState> {
+  await requireLandlord();
+  const buildingId = String(form.get("building_id") ?? "");
+  const guides = String(form.get("guides") ?? "").slice(0, 8000);
+  const supabase = await createClient();
+  const { error, count } = await supabase.from("buildings").update({ quick_fix_guides: guides }, { count: "exact" }).eq("id", buildingId);
+  if (error || !count) return { error: error?.message ?? "Could not save" };
+  revalidatePath("/dashboard/settings");
+  return { ok: "Guides saved. The chatbot uses them from now on." };
+}
+
+// ---------------------------------------------------------------- demo panel (architecture §5.1)
+
+export async function fireDemoEvent(_: ActionState, form: FormData): Promise<ActionState> {
+  await requireLandlord();
+  if (!demoEnabled()) return { error: "The demo panel is turned off." };
+  const unitId = String(form.get("unit_id") ?? "");
+  const preset = String(form.get("preset") ?? "") as import("@/lib/sensors").PresetKey;
+  const supabase = await createClient();
+  // RLS: the unit must be in one of the landlord's buildings.
+  const { data: unit } = await supabase.from("units").select("id, number, floor, building_id").eq("id", unitId).maybeSingle();
+  if (!unit) return { error: "Pick a flat." };
+
+  const admin = createAdminClient();
+  const { fireSensorEvent, PRESETS } = await import("@/lib/sensors");
+  const { mergeBuildingHeating } = await import("@/lib/grouping");
+  const { processTicket } = await import("@/lib/tickets");
+
+  let fired: string[];
+  const toClassify: string[] = [];
+  if (preset === "boiler") {
+    const { data: floorUnits } = await supabase.from("units").select("id, number").eq("building_id", unit.building_id).eq("floor", unit.floor).order("position");
+    for (const u of floorUnits ?? []) await fireSensorEvent(admin, u.id, "cold_room", "boiler");
+    fired = (floorUnits ?? []).map((u) => u.number);
+  } else if (preset in PRESETS) {
+    const { ticketId } = await fireSensorEvent(admin, unit.id, preset as keyof typeof PRESETS);
+    if (ticketId) toClassify.push(ticketId);
+    fired = [unit.number];
+  } else {
+    return { error: "Pick a preset." };
+  }
+  for (const id of toClassify) await processTicket(id);
+  if (preset === "boiler" || preset === "cold_room") await mergeBuildingHeating(admin, unit.building_id);
+
+  revalidatePath("/demo");
+  revalidatePath("/dashboard", "layout");
+  return { ok: `Fired for flat${fired.length > 1 ? "s" : ""} ${fired.join(", ")}.` };
+}
+
+export async function runRemindersNow(_: ActionState, form: FormData): Promise<ActionState> {
+  await requireLandlord();
+  if (!demoEnabled()) return { error: "The demo panel is turned off." };
+  const { sendDueReminders } = await import("@/lib/reminders");
+  const result = await sendDueReminders(createAdminClient(), { force: form.get("force") === "on" });
+  revalidatePath("/demo");
+  return { ok: `Sent ${result.sent} reminder${result.sent === 1 ? "" : "s"}.` };
 }

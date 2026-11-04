@@ -1,21 +1,23 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, TriangleAlert } from "lucide-react";
+import { ArrowLeft, CalendarClock, Link2, TriangleAlert } from "lucide-react";
 import { MediaGallery } from "@/components/media-gallery";
 import { MessageThread, type Message } from "@/components/message-thread";
 import { RealtimeRefresh } from "@/components/realtime-refresh";
 import { ProgressTracker, UrgencyBadge } from "@/components/ticket-ui";
 import { Button, Card, Input, SectionLabel } from "@/components/ui";
 import { SubmitButton } from "@/components/submit-button";
-import { postTenantMessage, quickFixOutcome } from "@/lib/actions/tenant";
+import { postTenantMessage, quickFixOutcome, replyToAppointment } from "@/lib/actions/tenant";
 import { requireTenant } from "@/lib/auth";
-import { formatDateTime, ticketTitle, type Ticket } from "@/lib/domain";
+import { availabilityWindows, formatDateTime, formatSlot, ticketTitle, TRADE_LABEL, type Ticket } from "@/lib/domain";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { AvailabilityPicker } from "./availability-picker";
 import { signMedia } from "@/lib/media";
 import { createClient } from "@/lib/supabase/server";
 
 export default async function TenantTicketPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  await requireTenant();
+  const tenant = await requireTenant();
   const supabase = await createClient();
   const { data: ticket } = await supabase.from("tickets").select("*").eq("id", id).maybeSingle<Ticket>();
   if (!ticket) notFound();
@@ -25,6 +27,33 @@ export default async function TenantTicketPage({ params }: { params: Promise<{ i
     supabase.from("reports").select("text, transcript, media_paths, created_at").eq("ticket_id", id).order("created_at"),
   ]);
   const mediaPaths = (reports ?? []).flatMap((r) => r.media_paths as string[]);
+
+  // Grouped tickets follow their parent (a building-wide ticket or the same problem reported earlier).
+  // The ticket was loaded through RLS above, so reading its parent and appointment server-side is safe.
+  const admin = createAdminClient();
+  const { data: parent } = ticket.parent_ticket_id
+    ? await admin.from("tickets").select("id, issue_type, summary, room, scope, status").eq("id", ticket.parent_ticket_id).maybeSingle()
+    : { data: null };
+  const visitTicketId = parent?.id ?? id;
+  const { data: appts } = await admin
+    .from("appointments")
+    .select("id, starts_at, ends_at, status, tenant_reply, technician_status, technician:technicians(name, trade)")
+    .eq("ticket_id", visitTicketId)
+    .in("status", ["proposed", "booked"])
+    .order("created_at", { ascending: false })
+    .limit(1);
+  const appt = appts?.[0] as
+    | { id: string; starts_at: string; ends_at: string; status: string; tenant_reply: string | null; technician_status: string | null; technician: { name: string; trade: keyof typeof TRADE_LABEL } }
+    | undefined;
+  const needsTimes =
+    !parent &&
+    !appt &&
+    ticket.classified_by !== null &&
+    ticket.scope === "apartment" &&
+    ticket.unit_id === tenant.unit.id &&
+    ticket.next_step === "schedule_technician" &&
+    ticket.urgency !== "emergency" &&
+    (ticket.status === "logged" || ticket.status === "confirmed");
   const urls = await signMedia(mediaPaths);
   const classifying = !ticket.classified_by && ticket.status === "logged";
 
@@ -35,6 +64,8 @@ export default async function TenantTicketPage({ params }: { params: Promise<{ i
         watch={[
           { table: "tickets", filter: `id=eq.${id}` },
           { table: "messages", filter: `ticket_id=eq.${id}` },
+          { table: "appointments", filter: `ticket_id=eq.${visitTicketId}` },
+          ...(parent ? [{ table: "tickets" as const, filter: `id=eq.${parent.id}` }] : []),
         ]}
       />
       <Link href="/app" className="flex min-h-11 items-center gap-1 self-start text-sm font-semibold text-primary">
@@ -66,6 +97,59 @@ export default async function TenantTicketPage({ params }: { params: Promise<{ i
           <ProgressTracker status={ticket.status} />
         )}
       </Card>
+
+      {parent && (
+        <div className="flex gap-3 rounded-xl bg-primary-soft px-4 py-3.5 text-[#0A3B31]">
+          <Link2 className="mt-0.5 size-5 shrink-0" aria-hidden />
+          <p className="text-[15px] leading-[22px]">
+            {parent.scope === "building" ? "Part of a building-wide problem: " : "Linked to a problem we already know about: "}
+            <span className="font-semibold">{ticketTitle(parent as Pick<Ticket, "issue_type" | "summary" | "room" | "scope">)}</span>. One repair covers everyone affected.
+          </p>
+        </div>
+      )}
+
+      {appt && (
+        <Card className="flex flex-col gap-3 p-4">
+          <SectionLabel>{appt.status === "proposed" ? "Appointment (waiting for your landlord)" : "Appointment"}</SectionLabel>
+          <div className="flex items-start gap-3">
+            <CalendarClock className="mt-0.5 size-5 shrink-0 text-stage-progress" strokeWidth={1.75} aria-hidden />
+            <div className="flex flex-col gap-0.5">
+              <span className="font-semibold">{formatSlot(appt.starts_at, appt.ends_at)}</span>
+              <span className="text-sm text-muted-foreground">
+                {appt.technician.name} · {TRADE_LABEL[appt.technician.trade]}
+                {appt.technician_status === "confirmed" && " · confirmed"}
+                {appt.technician_status === "late" && " · running late"}
+                {appt.technician_status === "on_site" && " · on site now"}
+              </span>
+            </div>
+          </div>
+          {appt.status === "booked" && !parent && (
+            appt.tenant_reply && appt.tenant_reply !== "reschedule" ? (
+              <p className="text-sm">
+                You said: <span className="font-semibold">{appt.tenant_reply === "home" ? "I'll be home" : "Someone else will let them in"}</span>
+              </p>
+            ) : (
+              <div className="flex flex-col gap-2">
+                <form action={replyToAppointment.bind(null, appt.id, "home")}>
+                  <Button className="w-full">I&apos;ll be home</Button>
+                </form>
+                <form action={replyToAppointment.bind(null, appt.id, "someone_else")}>
+                  <Button variant="secondary" className="w-full">
+                    Someone else will let them in
+                  </Button>
+                </form>
+                <form action={replyToAppointment.bind(null, appt.id, "reschedule")}>
+                  <Button variant="ghost" className="w-full underline">
+                    Reschedule
+                  </Button>
+                </form>
+              </div>
+            )
+          )}
+        </Card>
+      )}
+
+      {needsTimes && <AvailabilityPicker ticketId={id} windows={availabilityWindows()} dueAt={ticket.due_at} retry={ticket.needs_windows} />}
 
       {ticket.status === "quick_fix" && (
         <Card className="flex flex-col gap-3 p-4">

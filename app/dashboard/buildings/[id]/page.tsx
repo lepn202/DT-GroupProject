@@ -7,7 +7,7 @@ import { DueTag, StageChip, UrgencyBadge } from "@/components/ticket-ui";
 import { Button, ButtonLink, Card, SectionLabel } from "@/components/ui";
 import { dismissTicket } from "@/lib/actions/landlord";
 import { requireLandlord } from "@/lib/auth";
-import { compareTickets, formatDateTime, isOpen, TRADE_LABEL, ticketTitle, type Ticket } from "@/lib/domain";
+import { compareTickets, formatSlot, isOpen, TRADE_LABEL, ticketTitle, type Ticket } from "@/lib/domain";
 import { computeKpis, landlordTickets } from "@/lib/landlord-data";
 import { createClient } from "@/lib/supabase/server";
 import { cn } from "@/lib/utils";
@@ -26,13 +26,20 @@ export default async function BuildingPage({ params }: { params: Promise<{ id: s
   const tickets = (await landlordTickets(id)) as Row[];
   tickets.sort(compareTickets);
   const ids = tickets.map((t) => t.id);
-  const [{ data: reports }, { data: appointments }, { data: tenants }] = await Promise.all([
+  const [{ data: reports }, { data: appointments }, { data: tenants }, { data: children }] = await Promise.all([
     ids.length ? supabase.from("reports").select("ticket_id, source, transcript, media_paths").in("ticket_id", ids) : Promise.resolve({ data: [] }),
     ids.length
-      ? supabase.from("appointments").select("ticket_id, starts_at, status, technician:technicians(trade)").in("ticket_id", ids).in("status", ["proposed", "booked"])
+      ? supabase.from("appointments").select("ticket_id, starts_at, ends_at, status, technician:technicians(trade)").in("ticket_id", ids).in("status", ["proposed", "booked"])
       : Promise.resolve({ data: [] }),
     supabase.from("tenants").select("id, name, phone, email, unit:units!inner(number, building_id)").eq("unit.building_id", id),
+    ids.length ? supabase.from("tickets").select("parent_ticket_id, unit:units(number)").in("parent_ticket_id", ids) : Promise.resolve({ data: [] }),
   ]);
+  function linkedFlats(ticketId: string) {
+    return (children ?? [])
+      .filter((c) => c.parent_ticket_id === ticketId)
+      .map((c) => (c.unit as unknown as { number: string } | null)?.number)
+      .filter(Boolean) as string[];
+  }
 
   const kpis = computeKpis(tickets);
 
@@ -52,11 +59,12 @@ export default async function BuildingPage({ params }: { params: Promise<{ id: s
     const a = (appointments ?? []).find((x) => x.ticket_id === t.id);
     if (a) {
       const trade = (a.technician as unknown as { trade: keyof typeof TRADE_LABEL } | null)?.trade;
-      return `${formatDateTime(a.starts_at)}${trade ? ` · ${TRADE_LABEL[trade].toLowerCase()}` : ""}${a.status === "proposed" ? " (proposed)" : ""}`;
+      return `${formatSlot(a.starts_at, a.ends_at)}${trade ? ` · ${TRADE_LABEL[trade].toLowerCase()}` : ""}${a.status === "proposed" ? " (confirm)" : ""}`;
     }
     if (!isOpen(t)) return "—";
     if (!t.classified_by) return "Classifying…";
     if (t.urgency === "emergency" && t.next_step === "schedule_technician") return "Book now";
+    if (t.needs_windows) return "Needs more tenant times";
     if (t.next_step === "schedule_technician") return "Awaiting tenant slots";
     if (t.next_step === "inform_landlord") return "Next planned visit";
     if (t.next_step === "quick_fix") return "Quick fix sent";
@@ -65,7 +73,7 @@ export default async function BuildingPage({ params }: { params: Promise<{ id: s
 
   return (
     <div className="flex flex-1 flex-col">
-      <RealtimeRefresh channel={`building-${id}`} watch={[{ table: "tickets", filter: `building_id=eq.${id}` }]} />
+      <RealtimeRefresh channel={`building-${id}`} watch={[{ table: "tickets", filter: `building_id=eq.${id}` }, { table: "appointments" }]} />
       <Page className="flex-1">
         <PageHeader
           crumbs={
@@ -153,7 +161,9 @@ export default async function BuildingPage({ params }: { params: Promise<{ id: s
                             {t.classified_by ? ticketTitle(t) : "New report"}
                           </Link>
                           <div className="flex items-center gap-1.5 text-[13px] text-muted-foreground">
-                            {t.scope === "building" ? "Whole building" : `Flat ${t.unit?.number ?? "?"}`}
+                            {t.scope === "building"
+                              ? `Whole building${linkedFlats(t.id).length ? ` · flats ${linkedFlats(t.id).sort().join(", ")}` : ""}`
+                              : `Flat ${t.unit?.number ?? "?"}${linkedFlats(t.id).length ? ` + ${linkedFlats(t.id).length} linked report(s)` : ""}`}
                             {source(t.id) && <> · {source(t.id)}</>}
                             {t.needs_triage && isOpen(t) && (
                               <span className="inline-flex items-center gap-1 rounded-full bg-medium-tint px-2 py-0.5 text-xs font-semibold text-medium-text">
@@ -165,7 +175,15 @@ export default async function BuildingPage({ params }: { params: Promise<{ id: s
                         <td className="px-4 py-3 align-top">
                           <StageChip status={t.status} />
                         </td>
-                        <td className={cn("px-4 py-3 align-top", appointment(t) === "Book now" && "font-semibold text-emergency-text")}>{appointment(t)}</td>
+                        <td className={cn("px-4 py-3 align-top", appointment(t) === "Book now" && "font-semibold text-emergency-text", appointment(t) === "Needs more tenant times" && "font-semibold text-medium-text")}>
+                          {appointment(t) === "Book now" ? (
+                            <Link href={`/dashboard/tickets/${t.id}`} className="underline">
+                              Book now
+                            </Link>
+                          ) : (
+                            appointment(t)
+                          )}
+                        </td>
                         <td className="px-4 py-3 align-top">
                           <DueTag ticket={t} />
                         </td>
