@@ -42,6 +42,21 @@ What we are building and for whom. The research behind it is in [`evidence.md`](
 - Institutional owners (Vanguard or BlackRock scale), who already run internal ticket systems.
 - Student housing operators (e.g. in the UK), who already monitor dorms with sensors.
 
+### Persona
+
+**Markus, a property manager with 60 flats across Berlin,**
+**wants to** resolve tenant issues quickly,
+**because** satisfied tenants renew their leases and good tenants are hard to replace,
+**but** requests arrive scattered across WhatsApp, email and calls, so small problems get lost and become costly.
+
+| | |
+|---|---|
+| **Role** | Property manager / landlord, mid-market portfolio (30–100 units), the buyer of the product |
+| **Situation** | Handles repairs across several buildings himself and calls external technicians when needed. Would put his trusted technicians into the pool and likely start in Manual mode, moving to Automatic once he trusts the AI's bookings |
+| **Need** | One clear overview of what's open, what's urgent and what's overdue; tenants who feel looked after and stay |
+| **Friction** | Fragmented requests, no prioritisation, learns about problems late, spends his time chasing information instead of managing |
+| **Linked insights** | KI-7, KI-8, KI-9, KI-10, KI-11, KI-12 (landlord side); KI-3, KI-5 (tenant side, as the cause of churn), see [`evidence.md`](evidence.md) |
+
 ## 4. Solution
 
 **Two inputs, one engine.**
