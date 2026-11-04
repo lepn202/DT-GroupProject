@@ -7,10 +7,28 @@ import { Card, SectionLabel } from "@/components/ui";
 import { requireTenant } from "@/lib/auth";
 import { isOpen, ISSUE_LABEL, timeAgo } from "@/lib/domain";
 import { latestBroadcasts, tenantTickets } from "@/lib/tenant-data";
+import { createClient } from "@/lib/supabase/server";
+import { NoticeCard, SensorPrompt, type Notice, type PendingSensorEvent } from "@/components/tenant-notices";
 
 export default async function TenantHome() {
   const tenant = await requireTenant();
-  const [tickets, broadcasts] = await Promise.all([tenantTickets(tenant), latestBroadcasts(tenant.building.id, 1)]);
+  const supabase = await createClient();
+  const [tickets, broadcasts, { data: prompts }, { data: notices }] = await Promise.all([
+    tenantTickets(tenant),
+    latestBroadcasts(tenant.building.id, 1),
+    supabase.from("sensor_events").select("id, metric, value, preset, details, ticket_id, reported_at").eq("unit_id", tenant.unit.id).eq("confirmation", "pending").order("reported_at", { ascending: false }),
+    supabase
+      .from("notifications")
+      .select("id, kind, title, body, link, created_at")
+      .eq("tenant_id", tenant.id)
+      .eq("channel", "in_app")
+      .neq("kind", "sensor_prompt")
+      .is("read_at", null)
+      .order("created_at", { ascending: false })
+      .limit(5),
+  ]);
+  // Leak prompts first: they stay pinned until answered.
+  const pending = ((prompts ?? []) as PendingSensorEvent[]).sort((a, b) => Number(b.metric === "leak") - Number(a.metric === "leak"));
   const buildingWide = tickets.filter((t) => t.scope === "building" && isOpen(t));
   const mine = tickets.filter((t) => t.scope !== "building" && t.unit_id === tenant.unit.id && isOpen(t));
   const broadcast = broadcasts[0];
@@ -22,6 +40,8 @@ export default async function TenantHome() {
         watch={[
           { table: "tickets", filter: `building_id=eq.${tenant.building.id}` },
           { table: "broadcasts", filter: `building_id=eq.${tenant.building.id}` },
+          { table: "sensor_events", filter: `unit_id=eq.${tenant.unit.id}` },
+          { table: "notifications", filter: `tenant_id=eq.${tenant.id}` },
         ]}
       />
       <header className="flex items-center justify-between">
@@ -35,6 +55,14 @@ export default async function TenantHome() {
           {tenant.name[0]}
         </span>
       </header>
+
+      {pending.map((e) => (
+        <SensorPrompt key={e.id} event={e} />
+      ))}
+
+      {(notices ?? []).map((n) => (
+        <NoticeCard key={n.id} notice={n as Notice} />
+      ))}
 
       {broadcast && (
         <div className="flex gap-3 rounded-xl bg-primary-soft px-4 py-3.5 text-[#0A3B31]">
@@ -56,7 +84,7 @@ export default async function TenantHome() {
             <span className="text-[13px] text-muted-foreground">Known issue</span>
           </div>
           <ProgressTracker status={t.status} />
-          <p className="text-sm text-muted-foreground">We know about this. No need to report it.</p>
+          <p className="text-sm text-muted-foreground">{t.summary ? `${t.summary} ` : ""}We know about this. No need to report it.</p>
         </Card>
       ))}
 

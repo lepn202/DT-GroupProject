@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { Archive, Building2, LayoutGrid, LogOut, Menu, Plus, Settings, X } from "lucide-react";
+import { Archive, Building2, HardHat, LayoutGrid, LogOut, Menu, Plus, Radio, Settings, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { FixaLockup } from "@/components/logo";
 
@@ -13,9 +13,10 @@ type Props = {
   mode: "automatic" | "manual";
   buildings: { id: string; name: string }[];
   signOut: () => Promise<void>;
+  demo: boolean;
 };
 
-export function Sidebar({ appName, landlordName, mode, buildings, signOut }: Props) {
+export function Sidebar({ appName, landlordName, mode, buildings, signOut, demo }: Props) {
   const path = usePathname();
   const [open, setOpen] = useState(false);
 
@@ -63,8 +64,10 @@ export function Sidebar({ appName, landlordName, mode, buildings, signOut }: Pro
           {item("/dashboard/buildings/new", "Add building", <Plus className={iconCls} strokeWidth={1.75} aria-hidden />, path === "/dashboard/buildings/new")}
         </div>
         <div className="flex flex-col gap-0.5">
+          {item("/dashboard/technicians", "Technicians", <HardHat className={iconCls} strokeWidth={1.75} aria-hidden />, path.startsWith("/dashboard/technicians"))}
           {item("/dashboard/archive", "Archive", <Archive className={iconCls} strokeWidth={1.75} aria-hidden />, path.startsWith("/dashboard/archive"))}
           {item("/dashboard/settings", "Settings", <Settings className={iconCls} strokeWidth={1.75} aria-hidden />, path.startsWith("/dashboard/settings"))}
+          {demo && item("/demo", "Demo panel", <Radio className={iconCls} strokeWidth={1.75} aria-hidden />, path.startsWith("/demo"))}
         </div>
         <Link href="/dashboard/settings" className="mx-1 flex flex-col gap-0.5 rounded-lg border border-border px-3 py-2.5 hover:bg-muted">
           <span className="label-caps text-muted-foreground">Mode</span>

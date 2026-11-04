@@ -32,6 +32,8 @@ export type Ticket = {
   classification_confidence: number | null;
   status: TicketStatus;
   needs_triage: boolean;
+  /** No overlap between the tenant's times and any technician: more times asked for. */
+  needs_windows: boolean;
   landlord_touched: boolean;
   occurred_at: string;
   due_at: string | null;
@@ -195,4 +197,47 @@ export function timeAgo(iso: string | Date, now = new Date()) {
 /** "a plumber", "an electrician". */
 export function withArticle(word: string) {
   return `${/^[aeiou]/i.test(word) ? "an" : "a"} ${word}`;
+}
+
+/** "Thu 12.11, 08:00–10:00" in Berlin time. */
+export function formatSlot(startIso: string | Date, endIso: string | Date) {
+  const day = new Intl.DateTimeFormat("en-GB", { weekday: "short", day: "2-digit", month: "2-digit", timeZone: TZ }).format(new Date(startIso));
+  const time = (d: string | Date) => new Intl.DateTimeFormat("en-GB", { hour: "2-digit", minute: "2-digit", timeZone: TZ }).format(new Date(d));
+  return `${day}, ${time(startIso)}–${time(endIso)}`;
+}
+
+/** Calendar date and hour of an instant in Berlin time. */
+export function berlinParts(at: Date) {
+  const parts = Object.fromEntries(
+    new Intl.DateTimeFormat("en-GB", { year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", hourCycle: "h23", timeZone: TZ })
+      .formatToParts(at)
+      .map((p) => [p.type, p.value]),
+  );
+  return { year: Number(parts.year), month: Number(parts.month), day: Number(parts.day), hour: Number(parts.hour) };
+}
+
+/** The instant of a Berlin wall-clock time (handles summer/winter time). */
+export function berlinTime(year: number, month: number, day: number, hour: number): Date {
+  const guess = new Date(Date.UTC(year, month - 1, day, hour));
+  const seen = berlinParts(guess);
+  const diffHours = (Date.UTC(seen.year, seen.month - 1, seen.day, seen.hour) - guess.getTime()) / 36e5;
+  return new Date(guess.getTime() - diffHours * 36e5);
+}
+
+/** 2-hour windows over the next `days` days, 08:00–20:00 Berlin time, starting tomorrow (architecture §5.7). */
+export function availabilityWindows(now = new Date(), days = 7) {
+  const today = berlinParts(now);
+  const out: { starts_at: string; ends_at: string }[] = [];
+  for (let d = 1; d <= days; d++) {
+    for (const h of [8, 10, 12, 14, 16, 18]) {
+      const start = berlinTime(today.year, today.month, today.day + d, h);
+      out.push({ starts_at: start.toISOString(), ends_at: new Date(start.getTime() + 2 * 36e5).toISOString() });
+    }
+  }
+  return out;
+}
+
+/** Trade a technician needs for an issue type, when the classifier didn't name one. */
+export function tradeFor(issue: IssueType | null): Exclude<Trade, "none"> {
+  return issue === "water" ? "plumber" : issue === "heating" ? "heating" : issue === "electricity" ? "electrician" : "handyman";
 }
