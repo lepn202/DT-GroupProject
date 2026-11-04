@@ -3,6 +3,8 @@ import { redirect } from "next/navigation";
 import { AuthShell } from "@/components/auth-shell";
 import { Notice } from "@/components/ui";
 import { getUserId, homeFor } from "@/lib/auth";
+import { demoEnabled } from "@/lib/config";
+import { DemoAccounts } from "./demo-accounts";
 import { LoginForm } from "./login-form";
 
 export default async function LoginPage({ searchParams }: { searchParams: Promise<{ confirmed?: string }> }) {
@@ -21,6 +23,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
         <br />
         Tenant? Use the invite link from your landlord.
       </p>
+      {demoEnabled() && <DemoAccounts />}
     </AuthShell>
   );
 }

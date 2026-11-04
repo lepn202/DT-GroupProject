@@ -10,7 +10,7 @@ export function LoginForm() {
   return (
     <form action={action} className="flex flex-col gap-4">
       <Field label="Email">
-        <Input name="email" type="email" autoComplete="email" required />
+        <Input key={state?.email} name="email" type="email" autoComplete="email" defaultValue={state?.email} required />
       </Field>
       <Field label="Password">
         <Input name="password" type="password" autoComplete="current-password" required />
