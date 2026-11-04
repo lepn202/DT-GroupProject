@@ -52,10 +52,10 @@ What we are building and for whom. The research behind it is in [`evidence.md`](
 | | |
 |---|---|
 | **Role** | Property manager / landlord, mid-market portfolio (30–100 units), the buyer of the product |
-| **Situation** | Handles repairs across several buildings himself, with external technicians he calls when needed |
-| **Need** | One clear overview of what's open, what's urgent and what it costs; tenants who feel looked after and stay |
+| **Situation** | Handles repairs across several buildings himself and calls external technicians when needed. Would put his trusted technicians into the pool and likely start in Manual mode, moving to Automatic once he trusts the AI's bookings |
+| **Need** | One clear overview of what's open, what's urgent and what's overdue; tenants who feel looked after and stay |
 | **Friction** | Fragmented requests, no prioritisation, learns about problems late, spends his time chasing information instead of managing |
-| **Linked insights** | KI-7, KI-9, KI-10, KI-11, KI-12 (landlord side); KI-3, KI-5 (tenant side, as the cause of churn), see [`evidence.md`](evidence.md) |
+| **Linked insights** | KI-7, KI-8, KI-9, KI-10, KI-11, KI-12 (landlord side); KI-3, KI-5 (tenant side, as the cause of churn), see [`evidence.md`](evidence.md) |
 
 ## 4. Solution
 
