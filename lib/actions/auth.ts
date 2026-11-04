@@ -4,19 +4,33 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { homeFor } from "@/lib/auth";
+import { demoEnabled, emailConfirmationRequired } from "@/lib/config";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 
-export type FormState = { error?: string; notice?: string } | undefined;
+export type FormState = { error?: string; notice?: string; email?: string } | undefined;
 
 export async function signIn(_: FormState, form: FormData): Promise<FormState> {
   const supabase = await createClient();
-  const { error } = await supabase.auth.signInWithPassword({
-    email: String(form.get("email") ?? "").trim(),
-    password: String(form.get("password") ?? ""),
-  });
+  const email = String(form.get("email") ?? "").trim();
+  const password = String(form.get("password") ?? "");
+  let { error } = await supabase.auth.signInWithPassword({ email, password });
+
+  // Without the email gate, an account that signed up while confirmation was required (and never
+  // got the email) is confirmed now. Supabase answers "invalid credentials" for an unconfirmed
+  // account whatever the password, so confirm, retry, and undo it if the password was wrong.
+  if (error && !emailConfirmationRequired() && email) {
+    const admin = createAdminClient();
+    const { data: pendingId } = await admin.rpc("confirm_pending_email", { addr: email });
+    if (pendingId) {
+      ({ error } = await supabase.auth.signInWithPassword({ email, password }));
+      if (error) await admin.rpc("unconfirm_email", { uid: pendingId });
+    }
+  }
   if (error) {
-    if (error.code === "email_not_confirmed") return { error: "Confirm your email first: open the link we sent you, then sign in." };
-    return { error: "That email and password don't match. Try again." };
+    // The email is sent back so the form keeps it (React resets a form after its action runs).
+    if (error.code === "email_not_confirmed") return { error: "Confirm your email first: open the link we sent you, then sign in.", email };
+    return { error: "That email and password don't match. Try again.", email };
   }
   const home = await homeFor();
   // Signed in, but no landlord or tenant record yet: finish setting up.
@@ -29,6 +43,29 @@ async function confirmUrl() {
   const host = h.get("x-forwarded-host") ?? h.get("host");
   const proto = h.get("x-forwarded-proto") ?? (host?.startsWith("localhost") || host?.startsWith("127.") ? "http" : "https");
   return `${proto}://${host}/auth/confirm`;
+}
+
+/**
+ * Creates an account that is already confirmed and signs it in, so nobody waits for an email
+ * (the default; see emailConfirmationRequired). The landlord or tenant record comes from the
+ * same database trigger as before, fed by `metadata`.
+ */
+async function createConfirmedAccount(email: string, password: string, metadata: Record<string, string>): Promise<FormState | null> {
+  const admin = createAdminClient();
+  const { error } = await admin.auth.admin.createUser({ email, password, email_confirm: true, user_metadata: metadata });
+  if (error) {
+    if (error.code === "email_exists" || /already (been )?registered/i.test(error.message)) {
+      return { error: "There's already an account with this email. Sign in instead." };
+    }
+    if (/database error/i.test(error.message)) {
+      return { error: "That invite code or flat isn't valid any more. Ask your landlord for a new link." };
+    }
+    return { error: error.message };
+  }
+  const supabase = await createClient();
+  const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+  if (signInError) return { error: "Your account was created, but signing in failed. Try signing in." };
+  return null;
 }
 
 export async function signOut() {
@@ -47,6 +84,12 @@ const LandlordSignUp = z.object({
 export async function signUpLandlord(_: FormState, form: FormData): Promise<FormState> {
   const parsed = LandlordSignUp.safeParse(Object.fromEntries(form));
   if (!parsed.success) return { error: parsed.error.issues[0].message };
+
+  if (!emailConfirmationRequired()) {
+    const failed = await createConfirmedAccount(parsed.data.email, parsed.data.password, { role: "landlord", name: parsed.data.name });
+    if (failed) return failed;
+    redirect("/dashboard/buildings/new");
+  }
 
   const supabase = await createClient();
   // The landlord record is created by a database trigger from this metadata
@@ -76,6 +119,18 @@ export async function joinBuilding(_: FormState, form: FormData): Promise<FormSt
   const parsed = TenantSignUp.safeParse(Object.fromEntries(form));
   if (!parsed.success) return { error: parsed.error.issues[0].message };
   const d = parsed.data;
+
+  if (!emailConfirmationRequired()) {
+    const failed = await createConfirmedAccount(d.email, d.password, {
+      role: "tenant",
+      invite_code: d.code,
+      unit_id: d.unit,
+      name: d.name,
+      phone: d.phone,
+    });
+    if (failed) return failed;
+    redirect("/app");
+  }
 
   const supabase = await createClient();
   // The tenant record is created by a database trigger from this metadata, which also
@@ -109,4 +164,28 @@ export async function finishLandlordSetup(_: FormState, form: FormData): Promise
     .insert({ user_id: data.user.id, name: parsed.data.name, email: data.user.email ?? "" });
   if (error) return { error: "Couldn't finish setting up your account. Try again." };
   redirect("/dashboard/buildings/new");
+}
+
+/** The seeded demo accounts (supabase/seed.sql). They all use the same password. */
+const DEMO_ACCOUNTS = [
+  "markus@demo.test",
+  "mara@demo.test",
+  "jonas@demo.test",
+  "lea@demo.test",
+  "emre@demo.test",
+  "sofia@demo.test",
+  "paul@demo.test",
+  "nina@demo.test",
+];
+const DEMO_PASSWORD = "demo-password";
+
+/** One-click sign-in as a demo account, only while demo mode is on (DEMO_PANEL=true in production). */
+export async function signInAsDemo(email: string): Promise<FormState> {
+  if (!demoEnabled() || !DEMO_ACCOUNTS.includes(email)) return { error: "Demo accounts are turned off." };
+  const supabase = await createClient();
+  const { error } = await supabase.auth.signInWithPassword({ email, password: DEMO_PASSWORD });
+  if (error) {
+    return { error: "The demo accounts aren't loaded in this database yet. See README, “Test accounts”." };
+  }
+  redirect(await homeFor());
 }

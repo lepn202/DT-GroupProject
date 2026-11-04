@@ -65,11 +65,23 @@ In-app notices appear on Home (tenants) and as alerts above the dashboard (landl
 
 ### Hosted Supabase + Vercel
 
-1. Apply the migrations to the hosted project: `npx supabase link --project-ref YOUR_REF`, then `npx supabase db push`. (Skip `seed.sql` unless you want the demo data there.)
-2. In Vercel, set `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` and `SUPABASE_SERVICE_ROLE_KEY` (Supabase → Project Settings → API), plus the optional keys above.
-3. In Supabase → **Authentication → URL Configuration**, set **Site URL** to your Vercel URL (e.g. `https://your-app.vercel.app`) and add `https://your-app.vercel.app/**` to **Redirect URLs**. Without this, the link in the confirmation email points at `localhost:3000`.
+1. Apply the migrations to the hosted project: `npx supabase link --project-ref YOUR_REF`, then `npx supabase db push`. To load the test accounts too, see **Test accounts** below.
+2. In Vercel, set `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` and `SUPABASE_SERVICE_ROLE_KEY` (Supabase → Project Settings → API), plus the optional keys above. Set `DEMO_PANEL=true` while you're testing.
+3. In Supabase → **Authentication → URL Configuration**, set **Site URL** to your Vercel URL (e.g. `https://your-app.vercel.app`) and add `https://your-app.vercel.app/**` to **Redirect URLs**. Only needed if you turn email confirmation back on.
 
-Hosted Supabase asks new accounts to confirm their email. The landlord or tenant record is created by a database trigger at sign-up, so it's there once they confirm; the email link lands on `/auth/confirm` and signs them in. An account that is signed in but has no record (e.g. created before this fix) is sent to `/welcome` to finish setting up as a landlord.
+**No email confirmation (default).** Sign-up creates the account already confirmed (server-side, with the service-role key) and signs the person straight in, whatever the Supabase project's "Confirm email" setting. Supabase's built-in email sender allows only a few emails an hour, which is why sign-up seemed broken. Accounts that signed up earlier and never got their email are confirmed the next time they sign in with the right password. To bring the confirmation email back, set `REQUIRE_EMAIL_CONFIRMATION=true` (and set up email on the Supabase project first: Authentication → Emails → SMTP). Then the email link lands on `/auth/confirm` and signs them in, and the landlord or tenant record is created by a database trigger at sign-up.
+
+### Test accounts
+
+`supabase/seed.sql` creates the demo landlord and tenants above (password `demo-password`), three buildings, history tickets and technicians. Locally, `npx supabase db reset` loads it. On the hosted project, load it **once** after the migrations:
+
+```bash
+npx supabase db push --include-seed
+```
+
+Run it on a project that doesn't have the demo data yet (it uses fixed ids, so a second run stops at the first duplicate). The technicians' free slots cover the 14 days after you run it.
+
+With `DEMO_PANEL=true` (always on in development), the sign-in page lists the test accounts with one-tap sign-in, and the landlord sidebar shows the **Demo panel**. Turn it off (and remove the demo accounts) before real users sign up: everyone can see the shared password.
 
 ### Appointment reminders
 
