@@ -63,6 +63,14 @@ Sign in as `markus@demo.test` in one window and `mara@demo.test` in another (a p
 
 In-app notices appear on Home (tenants) and as alerts above the dashboard (landlords). Emails go out through [Resend](https://resend.com) when `RESEND_API_KEY` is set; either way every email is logged in `notifications` and listed in the demo panel's **Outbox**. `APP_URL` is used for links in emails.
 
+### Hosted Supabase + Vercel
+
+1. Apply the migrations to the hosted project: `npx supabase link --project-ref YOUR_REF`, then `npx supabase db push`. (Skip `seed.sql` unless you want the demo data there.)
+2. In Vercel, set `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` and `SUPABASE_SERVICE_ROLE_KEY` (Supabase → Project Settings → API), plus the optional keys above.
+3. In Supabase → **Authentication → URL Configuration**, set **Site URL** to your Vercel URL (e.g. `https://your-app.vercel.app`) and add `https://your-app.vercel.app/**` to **Redirect URLs**. Without this, the link in the confirmation email points at `localhost:3000`.
+
+Hosted Supabase asks new accounts to confirm their email. The landlord or tenant record is created by a database trigger at sign-up, so it's there once they confirm; the email link lands on `/auth/confirm` and signs them in. An account that is signed in but has no record (e.g. created before this fix) is sent to `/welcome` to finish setting up as a landlord.
+
 ### Appointment reminders
 
 `/api/cron/reminders` sends due reminders. It needs `Authorization: Bearer $CRON_SECRET`. On Supabase, schedule it every 15 minutes with pg_cron and pg_net (SQL editor, once per project):
