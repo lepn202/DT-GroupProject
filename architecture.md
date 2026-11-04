@@ -6,9 +6,9 @@
 
 ## 1. MVP in one paragraph
 
-The product is one web app with two faces. Tenants get a **mobile-first app** to report problems with a photo, video, voice memo or text, and to confirm simulated sensor alerts. Landlords get a **problem-first dashboard** across their portfolio. An AI classifier turns every report into a ticket and then does one of four things: sends a **quick fix** through the chatbot, **books a technician** from a shared pool against the tenant's availability, **logs it** for the landlord, or **dismisses** it. Technicians have no app. They get an email with a private link to a single page. Sensors are **simulated** from a demo panel.
+The product is one web app with two faces. Tenants get a **mobile-first app** to report problems with a photo, video, voice memo or text, and to confirm simulated sensor alerts. Landlords get a **problem-first dashboard** across their portfolio. An AI classifier turns every report into a ticket and then does one of four things: sends a **quick fix** through the chatbot, **books a technician** (the landlord's own, or from a shared pool) against the tenant's availability, **logs it** for the landlord, or **dismisses** it. Emergencies go straight to the landlord, who can book without waiting for the tenant. Technicians have no app. They get an email with a private link to a single page. Sensors are **simulated** from a demo panel.
 
-**MVP focus** (from `product.md` §6): simulated sensors, the tenant self-reporting flow end to end, and the landlord dashboard.
+**MVP focus** (from `product.md` §6): simulated sensors, the tenant self-reporting flow end to end, and the landlord dashboard. **Everything is in English:** UI, chatbot, emails, voice recognition (`en-GB`).
 
 ### What the evidence asks of the design
 
@@ -78,7 +78,7 @@ One language (**TypeScript**), one app (**Next.js**) and one managed backend (**
 | Scheduled jobs | **Supabase Cron** calling one API route every 15 min | Appointment reminders |
 | Classification | **TypeSafe Jev** (`@typesafe-ai/sdk`) | Typed answers + confidence for the classifier's fixed-choice fields, much cheaper than an LLM |
 | Text AI | **Claude API** (`@anthropic-ai/sdk`), model `claude-opus-5-5` | Ticket summaries, quick-fix text, chatbot, fallback classification |
-| Voice memos | Browser **Web Speech API** | Transcribed live on the phone. No speech-to-text service |
+| Voice memos | Browser **Web Speech API** (`lang = en-GB`) | Transcribed live on the phone. No speech-to-text service |
 | Video | Browser `<video>` + `<canvas>` | ~4 still frames are extracted on the phone before upload. No ffmpeg |
 | Notifications | **In-app** (Realtime), **Web Push** for tenants, **email** via Resend | Sensor confirmations, booking notices, broadcasts, technician bookings, reminders |
 | Hosting | **Vercel** + **Supabase Cloud** free tiers | Enough for the prototype |
@@ -141,7 +141,7 @@ The panel lets you pick building, flat and preset, and shows the resulting tenan
 1. A new `sensor_event` sends the flat's tenants a **push notification** plus a card on Home: *"Is your living room cold? It has been 15 °C for 6 hours with the radiator on."* → **Yes / No / Add photo**.
 2. **No** → the event is marked `dismissed`. Nothing reaches the landlord. It shows in the tenant's History.
 3. **Yes / Add photo** → a `report` with `source = sensor` is created (plus the photo, if added) and goes to the classifier (§5.4).
-4. Leak prompts are marked urgent and stay pinned at the top of Home until answered.
+4. **Emergencies don't wait for the tenant.** Leak events (and any ticket the safety rules mark `emergency`) create the ticket and alert the landlord immediately, while the tenant prompt stays pinned at the top of Home. The landlord can book a technician straight away (§5.7). A later "No" from the tenant is shown on the ticket, but it doesn't cancel a booking the landlord has made.
 
 ### 5.3 Tenant app
 
@@ -180,7 +180,12 @@ The Web Speech API works in Chrome and Safari, but Chrome sends the audio to Goo
 
 **History:** past tickets (status, date, media, outcome) plus confirmed and dismissed sensor alerts.
 **Profile:** personal details, password, linked building and apartment.
-**Messages:** landlord broadcasts and ticket messages, technician updates, and the chatbot.
+**Messages:**
+- landlord broadcasts (read-only)
+- one **thread per ticket**, where the tenant, the landlord and technician updates meet
+- the chatbot
+
+There are no direct messages outside a ticket; those happen outside the app.
 
 ### 5.4 AI classifier
 
@@ -223,7 +228,7 @@ Jev: issue_type, scope, urgency, next_step, trade, related_tickets
 | `next_step` | Result |
 |---|---|
 | `quick_fix` | Ticket status `quick_fix`. The chatbot sends `quick_fix_text` in Messages with "Fixed it" / "Didn't work". "Didn't work" switches to `schedule_technician` |
-| `schedule_technician` | The tenant's availability picker opens → matching and booking (§5.7) |
+| `schedule_technician` | The tenant's availability picker opens → matching and booking (§5.7). **If `urgency = emergency`:** no picker; the landlord is alerted and books directly (§5.7) |
 | `inform_landlord` | Ticket stays `logged` and appears on the dashboard without a booking (e.g. cosmetic damage kept for the next planned visit) |
 | `dismiss` | Ticket status `dismissed`, with a short reason for the tenant. Visible in History |
 
@@ -265,7 +270,11 @@ A Claude chat in the Messages tab, at effort `medium`. It handles:
 
 ### 5.7 Scheduling, technician pool and visits
 
-**Technician pool:** one shared pool of technicians, seeded for the demo. Each has a trade, contact details and availability slots. Whether landlords bring their own technicians is still open (`product.md` §10).
+**Technician pool:**
+- a **shared pool** of technicians available to every landlord (seeded for the demo)
+- **custom technicians** that a landlord adds on `/dashboard/technicians` (name, trade, email, phone). They're used only for that landlord's buildings, and they get the same link page as pool technicians
+
+Each technician has a trade, contact details and availability slots.
 
 **Technicians have no accounts.** Each technician has a long random **link token**. Every email to them contains a link to `/t/[token]`, a single page where they can:
 - set or update their **availability** (weekly time slots)
@@ -275,10 +284,12 @@ A Claude chat in the Messages tab, at effort `medium`. It handles:
 **Matching and booking** (plain code, no AI):
 
 1. The classifier picks `schedule_technician`, and the tenant marks when they're home (2-hour windows over the next 7 days; slots before the due time are highlighted).
-2. Code finds the **earliest overlap** between the tenant's windows and a free slot of a technician with the right `trade`.
+2. Code finds the **earliest overlap** between the tenant's windows and a free slot of a technician with the right `trade`. It searches the landlord's **custom technicians first**, then the **shared pool**.
 3. **Automatic mode** (default): the appointment is `booked` straight away. **Manual mode:** it's `proposed` and waits on the dashboard until the landlord confirms it or picks another slot or technician.
 4. On booking, the **technician gets an email** with the job and their link, **all tenants of the flat** (roommates) are told the slot, and the ticket moves to `booked`. For a building-wide ticket, every affected flat is told.
 5. If there's no overlap, the tenant is asked for more windows and the ticket is flagged on the dashboard.
+
+**Emergency booking** (both modes): an `emergency` ticket skips the tenant's confirmation and availability steps. The landlord gets a push and email alert, and the ticket shows a **Book now** button. It suggests the earliest free technician with the right trade (custom first, then pool), and the landlord can pick another one or a different time. On booking, the technician is emailed and all tenants of the affected flats are told the time.
 
 **Reminders** (Supabase Cron → `/api/cron/reminders`, every 15 min) go out the evening before and 1 hour before the slot, by push and email. The tenant answers **"I'll be home" / "Someone else will let them in" / "Reschedule"**. "Reschedule" reopens the availability picker and frees the slot. The technician is notified.
 
@@ -286,7 +297,7 @@ A Claude chat in the Messages tab, at effort `medium`. It handles:
 
 | Outcome | Effect |
 |---|---|
-| `completed` | Ticket → `resolved` and moves to the tenant's History |
+| `completed` | Ticket → `resolved` (the technician closes it). It moves to the tenant's History and stays on the landlord's dashboard until dismissed (§5.8) |
 | `needs_follow_up` | Parts or a second visit needed. The tenant gets the availability picker again for a new appointment |
 | `no_access` | Nobody let them in. Re-booked through the tenant's availability picker. Counts as a missed appointment on the dashboard |
 
@@ -297,8 +308,10 @@ Problem-first, not tenant-first (`product.md` §9). Names and phone numbers only
 | Screen | Route | Content |
 |---|---|---|
 | **Portfolio** | `/dashboard` | List of buildings (name, address, units, open/resolved tickets). Custom problem bar: the landlord picks which stats are shown (open, overdue, emergencies, avg. time to fix), and buildings well above the portfolio average are flagged. "Message building" button |
-| **Building** | `/dashboard/buildings/[id]` | KPI bar. Pipeline of tickets by stage. Problem list ranked by urgency, then due time (issue, stage, urgency, overdue marker). Tenants list (secondary). Master message bar at the bottom → broadcast |
-| **Ticket detail** | `/dashboard/tickets/[id]` | Media and voice transcript, classification + urgency (editable), reporter (flat, name, contact), linked reports, technician + appointment, progress % (25/50/75/100 by stage), timeline, ticket messages. In manual mode: confirm / change the proposed appointment |
+| **Building** | `/dashboard/buildings/[id]` | KPI bar. Pipeline of tickets by stage. Problem list ranked by urgency, then due time (issue, stage, urgency, overdue marker); emergencies pinned at the top. Resolved tickets stay in the list, greyed out, with a **Dismiss** button. Tenants list (secondary). Master message bar at the bottom → broadcast |
+| **Ticket detail** | `/dashboard/tickets/[id]` | Media and voice transcript, classification + urgency (editable), reporter (flat, name, contact), linked reports, technician + appointment, progress % (25/50/75/100 by stage), timeline, ticket message thread (landlord can reply). Emergencies: **Book now**. Manual mode: confirm / change the proposed appointment. Resolved: **Dismiss** |
+| **Archive** | `/dashboard/archive` | Dismissed tickets, read-only, searchable by building and issue type. Kept for reference |
+| **Technicians** | `/dashboard/technicians` | The landlord's custom technicians (add, edit, remove, resend link) and a read-only view of the shared pool |
 | **Settings** | `/dashboard/settings` | Mode (automatic / manual), due times per urgency, quick-fix guides per building |
 | **Properties** | `/dashboard/buildings/new`, `/dashboard/buildings/[id]/invite` | Register buildings and units, generate the tenant invite link/code |
 
@@ -314,7 +327,9 @@ Problem-first, not tenant-first (`product.md` §9). Names and phone numbers only
 | Technician visits / missed appointments | `appointments`, `outcome = no_access` |
 | Handled without the landlord | Tickets with no landlord action (automatic mode, no edits). A stand-in for "time saved" |
 
-Costs and tenant retention are not measured in the MVP (no payments, no lease data).
+Costs and tenant retention are not tracked in the MVP (no payments, no lease data).
+
+**One landlord account:** each landlord has a single dashboard login. There are no property-manager or maintenance-staff accounts; technicians only use their link pages.
 
 ### 5.9 Onboarding
 
@@ -335,7 +350,7 @@ Costs and tenant retention are not measured in the MVP (no payments, no lease da
 | Tenant | `/app/messages` | Messages + chatbot |
 | Tenant | `/app/profile` | Profile |
 | Tenant | `/app/tickets/[id]` | Ticket progress, availability picker, appointment confirmation |
-| Landlord | `/dashboard`, `/dashboard/buildings/[id]`, `/dashboard/tickets/[id]`, `/dashboard/settings` | See §5.8 |
+| Landlord | `/dashboard`, `/dashboard/buildings/[id]`, `/dashboard/tickets/[id]`, `/dashboard/archive`, `/dashboard/technicians`, `/dashboard/settings` | See §5.8 |
 | Technician | `/t/[token]` | Availability, jobs, status buttons (no login) |
 | Demo | `/demo` | Sensor event panel |
 | System | `/api/cron/reminders` | Called by Supabase Cron (protected with a shared secret) |
@@ -373,12 +388,12 @@ erDiagram
 | `buildings` | `id`, `landlord_id`, `name`, `address`, `invite_code` |
 | `units` | `id`, `building_id`, `floor`, `position`, `number` (e.g. "4B") |
 | `tenants` | `id`, `user_id`, `unit_id`, `name`, `email`, `phone` |
-| `technicians` | `id`, `name`, `trade`, `email`, `phone`, `link_token` |
+| `technicians` | `id`, `landlord_id` (null = shared pool, set = that landlord's custom technician), `name`, `trade`, `email`, `phone`, `link_token` |
 | `tech_slots` | `technician_id`, `starts_at`, `ends_at` |
 | `sensor_events` | `id`, `unit_id`, `metric`, `value`, `duration`, `occurred_at`, `confirmation` (`pending` / `yes` / `no`), `simulated = true` |
 | `reports` | `id`, `unit_id`, `tenant_id`, `source` (`tenant` / `sensor`), `sensor_event_id`, `text`, `transcript`, `media_paths`, `frame_paths`, `created_at`, `ticket_id` |
-| `tickets` | `id`, `building_id`, `unit_id` (null if building-wide), `parent_ticket_id`, classifier fields (`issue_type`, `room`, `scope`, `urgency`, `next_step`, `trade`, `quick_fix_text`, `summary`), `classified_by` (`jev` / `claude` / `landlord`), `status` (`logged` / `confirmed` / `quick_fix` / `booked` / `in_progress` / `resolved` / `dismissed`), `needs_triage`, `occurred_at`, `due_at`, `resolved_at` |
-| `appointments` | `id`, `ticket_id`, `technician_id`, `starts_at`, `ends_at`, `status` (`proposed` / `booked` / `cancelled` / `done`), `tenant_reply` (`home` / `someone_else` / `reschedule`), `outcome` (`completed` / `needs_follow_up` / `no_access`), `reminders_sent` |
+| `tickets` | `id`, `building_id`, `unit_id` (null if building-wide), `parent_ticket_id`, classifier fields (`issue_type`, `room`, `scope`, `urgency`, `next_step`, `trade`, `quick_fix_text`, `summary`), `classified_by` (`jev` / `claude` / `landlord`), `status` (`logged` / `confirmed` / `quick_fix` / `booked` / `in_progress` / `resolved` / `dismissed`), `needs_triage`, `occurred_at`, `due_at`, `resolved_at`, `archived_at` (set when the landlord dismisses a resolved ticket) |
+| `appointments` | `id`, `ticket_id`, `technician_id`, `starts_at`, `ends_at`, `booked_by` (`system` / `landlord`), `status` (`proposed` / `booked` / `cancelled` / `done`), `tenant_reply` (`home` / `someone_else` / `reschedule`), `outcome` (`completed` / `needs_follow_up` / `no_access`), `reminders_sent` |
 | `tenant_windows` | `ticket_id`, `tenant_id`, `starts_at`, `ends_at` (the tenant's availability for that ticket) |
 | `ticket_events` | `ticket_id`, `type`, `actor` (`ai` / `tenant` / `landlord` / `technician` / `system`), `data`, `created_at` |
 | `messages` | `id`, `ticket_id`, `from` (`ai` / `tenant` / `landlord` / `technician`), `text`, `created_at` |
@@ -416,7 +431,11 @@ sequenceDiagram
 
 **D. Tenant says no:** sensor event → "Is your room cold?" → **No** → event dismissed, nothing reaches the landlord.
 
-**E. Missed visit:** reminder sent → no reply → the technician taps Done → `no_access` → the tenant gets the availability picker again, and the dashboard counts a missed appointment.
+**E. Emergency leak:** demo panel fires a leak in 2B → ticket `water · emergency` created at once; the landlord gets an alert and 1B (the flat below) a warning; the tenant in 2B sees a pinned prompt → the landlord taps **Book now** and accepts the suggested plumber → the plumber is emailed and 2B is told the time, with no tenant step in between.
+
+**F. Closing and dismissing:** the technician taps Done → `completed` → the ticket is `resolved`, moves to the tenant's History and is greyed out on the dashboard → the landlord taps **Dismiss** → it moves to the archive.
+
+**G. Missed visit:** reminder sent → no reply → the technician taps Done → `no_access` → the tenant gets the availability picker again, and the dashboard counts a missed appointment.
 
 ## 9. Out of scope (MVP)
 
@@ -424,7 +443,10 @@ As in `product.md` §6:
 - Real sensor hardware and integrations (simulated events only)
 - Shared-space issues (e.g. rubbish in common areas)
 - A technician app or technician accounts (only the link page in §5.7)
-- Payments, invoicing, rent and contracts
+- Payments, invoicing, rent and contracts, and cost tracking
+- Direct messages outside a ticket (these happen outside the app)
+- Extra landlord-side accounts (property managers, maintenance staff)
+- Languages other than English
 - Cross-building ML prediction
 
 ## 10. Repository layout
@@ -456,7 +478,7 @@ As in `product.md` §6:
 - API keys live only in server-side environment variables, never in the browser.
 - **Row-Level Security:**
   - tenants see their own unit's tickets, building-wide tickets in their building, their building's broadcasts, and their own messages
-  - landlords see only their own buildings
+  - landlords see only their own buildings and their own custom technicians, plus the shared pool (name and trade only)
 - **Technician pages** use a long random token and are served only through server code. Each page shows only that technician's jobs. Contact details are the minimum needed (flat, slot, tenant first name and phone).
 - Media sits in a private bucket and is served through short-lived signed URLs.
 - Only the minimum context goes to Jev and Claude (no names or contact details).
@@ -469,7 +491,7 @@ As in `product.md` §6:
 | 1 | Next.js + Supabase setup, schema and RLS, seed data, landlord sign-up, buildings and units, invite link, tenant sign-up |
 | 2 | Tenant app shell (bottom nav), Add ticket (photo, video frames, voice transcript, text), "Received" confirmation, Home and History |
 | 3 | Classifier (safety rules → Jev → Claude), next-step handling, due times, Realtime progress |
-| 4 | Landlord dashboard: Portfolio, Building view with KPI bar and problem list, Ticket detail, Settings, broadcasts |
+| 4 | Landlord dashboard: Portfolio, Building view with KPI bar and problem list, Ticket detail with message thread, Dismiss + Archive, Settings, broadcasts |
 | 5 | Demo panel, tenant confirmation, grouping into building-wide tickets, building status bar, neighbour notice |
-| 6 | Tenant availability, matching and booking, automatic/manual mode, technician link page, booking emails, roommate notices |
+| 6 | Tenant availability, matching and booking (custom technicians first, then pool), automatic/manual mode, emergency **Book now**, Technicians page, technician link page, booking emails, roommate notices |
 | 7 | Reminders, visit outcomes and re-booking, chatbot with quick fixes and status answers, full run-through of the demo script |

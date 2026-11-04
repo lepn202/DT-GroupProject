@@ -33,8 +33,8 @@ What we are building and for whom. The research behind it is in [`evidence.md`](
 | Role | Who | Relationship to the product |
 |---|---|---|
 | **Buyer** | Mid-market property managers and landlords with roughly **30–100 units** (upper end: around 50 houses with 15–20 apartments each) | Big enough to feel the fragmentation, small enough to still care about individual tenants |
-| **Daily users** | Landlord / property manager, and tenants | Dashboard (landlord), app (tenant) |
-| **External partner** | Technicians | Part of the workflow through a technician pool. Not full platform users |
+| **Daily users** | Landlord / property manager, and tenants | Dashboard (landlord, one account), app (tenant) |
+| **External partner** | Technicians | Part of the workflow through a technician pool. No accounts: they use a private link from their booking emails |
 
 **Pricing model:** the landlord buys the licence and provides the app to their tenants.
 
@@ -46,7 +46,7 @@ What we are building and for whom. The research behind it is in [`evidence.md`](
 
 **Two inputs, one engine.**
 
-- **System reports:** IoT sensors flag anomalies. These can be temperature, humidity, water-leak, smart radiator-valve and window-contact sensors, or existing Siemens-style building data on heating and water pipes. The tenant confirms or dismisses each alert before anything happens.
+- **System reports:** IoT sensors flag anomalies. These can be temperature, humidity, water-leak, smart radiator-valve and window-contact sensors, or existing Siemens-style building data on heating and water pipes. The tenant confirms or dismisses each alert before anything happens, except for emergencies such as a leak: those reach the landlord immediately, and the landlord can book a technician without waiting for the tenant.
 - **Tenant reports:** the tenant notices first and reports with a photo, video, voice memo or short description. No forms.
 
 Both go into the **AI classifier**, which decides the issue type, urgency and next step. The AI then does one of two things:
@@ -79,7 +79,7 @@ Issue
                                                                  Contact maintenance
                                                                           │
                                                                           ▼
-                                                     Landlord / maintenance dashboard
+                                                          Landlord dashboard
                                             (classifier and scheduling also feed in)
 ```
 
@@ -88,14 +88,14 @@ Issue
 | Step | Who | What happens | Output |
 |---|---|---|---|
 | 1a. System report | Sensor | Anomaly detected in heating, water supply or similar | Draft alert |
-| 1b. Tenant confirms | Tenant | Push notification: "Are you experiencing this?" **Yes / No / Add photo**. "No" cancels the request, "Yes" moves it forward | Confirmed alert or cancelled request |
+| 1b. Tenant confirms | Tenant | Push notification: "Are you experiencing this?" **Yes / No / Add photo**. "No" cancels the request, "Yes" moves it forward. Emergency alerts (e.g. a leak) also go to the landlord right away | Confirmed alert or cancelled request |
 | 2a. Tenant report | Tenant | Opens the app and records a voice memo, photo, video or text | Raw report |
 | 3. AI classifier | AI | Assigns issue type, urgency and next step. Scraped paint is low priority; leaking water on the fifth floor is high | Ticket |
 | 4a. Quick fix | AI chatbot | For a minor issue, sends a step-by-step guide for fixing it | Ticket resolved or escalated |
-| 4b. Scheduling | AI | If a technician is needed, the tenant enters their availability in the app. The AI matches it against the technician pool and books a slot. Affected roommates and neighbours are informed | Booked slot |
+| 4b. Scheduling | AI | If a technician is needed, the tenant enters their availability in the app. The AI matches it against the technician pool and books a slot. Affected roommates and neighbours are informed. **Emergencies:** the landlord books a technician directly, without waiting for the tenant | Booked slot |
 | 5. Contact maintenance | AI | Sends the ticket with media, location and slot to the technician by email or message | Technician dispatched |
 | 6. Dashboard | Landlord | Monitors everything live: buildings, problems, status, KPIs | Overview |
-| 7. Resolution | Technician, tenant | The problem is fixed, the ticket closes and appears in the tenant's history | Closed ticket |
+| 7. Resolution | Technician | The technician closes the ticket. It moves to the tenant's history and stays on the landlord's dashboard until the landlord dismisses it. Dismissed tickets are kept in an archive for reference | Closed ticket |
 
 ### Examples
 
@@ -115,6 +115,8 @@ Issue
 - AI classifier: issue type, urgency, next step
 - Chatbot quick fix for minor issues
 - Scheduling: tenant availability matched to the technician pool and booked automatically
+- Emergency booking by the landlord, without tenant confirmation
+- Technician pool: a shared pool, plus the landlord's own (custom) technicians
 - Notifications to affected roommates and neighbours
 - Landlord broadcast messages to a building
 - Landlord dashboard: portfolio list, per-building problem view, KPIs, ticket detail
@@ -139,9 +141,15 @@ Issue
 - A technician-side app or technician accounts. Technicians get booking emails with a private link to one page where they set their availability and update the job (confirmed / running late / on site / done)
 - Payments and invoicing
 - Rent and contracts
+- Cost tracking (repair costs are not recorded)
+- Direct messages outside tickets (these stay outside the app, e.g. phone or email)
+- Extra landlord-side accounts (property managers, maintenance staff)
+- Languages other than English
 - Cross-building ML prediction (vision, not MVP)
 
 > **MVP focus:** simulate the sensors, build the tenant self-reporting flow end to end, and build the landlord dashboard.
+>
+> **Language:** the whole MVP is in English (app, dashboard, chatbot, voice memos, emails).
 
 ## 7. Onboarding
 
@@ -193,8 +201,8 @@ Mobile-first (phone format). Simple, not complicated.
 
 ### Messages
 
-- Messages from the landlord (broadcasts and direct messages).
-- Messages from technicians (confirmation, running late, done).
+- Landlord broadcasts to the building.
+- **Ticket messages only:** each ticket has one thread where the tenant, the landlord and technician updates (confirmation, running late, done) meet. There are no direct messages outside a ticket; those happen outside the app.
 - The chatbot for minor problems: "Why is my room cold?", quick-fix guides, status questions.
 
 ## 9. Landlord dashboard
@@ -211,8 +219,9 @@ Mobile-first (phone format). Simple, not complicated.
 
 ### Screen 2: Building view
 
-- **KPIs at the top:** open vs. resolved tickets, and possibly time to resolve, costs and technician visits. Configurable.
+- **KPIs at the top:** open vs. resolved tickets, and possibly time to resolve and technician visits. Configurable. (Costs are not tracked in the MVP.)
 - **Problem list**, ranked by urgency. Each row shows the issue name (e.g. "Water leak", "Heating"), its status stage and an urgency marker. A pipeline view of tickets by stage could sit at the top.
+- **Resolved tickets stay** in the problem list, marked resolved, until the landlord dismisses them. Dismissed tickets move to an archive and are kept for reference.
 - **Master message bar** at the bottom: send a message to everyone in this building. This is the broadcast the tenant sees pinned on their Home screen.
 - The tenants living there are visible, but they're not the main view.
 
@@ -232,13 +241,15 @@ Mobile-first (phone format). Simple, not complicated.
 | **Automatic** (default) | The AI books technicians and informs tenants. The landlord only monitors |
 | **Manual** (optional) | The landlord sees every scheduling request and confirms each one before it goes out |
 
+**Emergencies (both modes):** the landlord is alerted immediately and can book a technician straight from the ticket, without waiting for the tenant to confirm or enter availability. The tenants are told the booked time.
+
 ## 10. Scheduling and technician pool
 
 - The tenant enters their availability in the app once the classifier decides a technician is needed.
-- The platform holds a **technician pool**. Technicians set their own availability directly.
-- The AI matches the tenant's availability against the pool and **books the earliest fit**. It then sends the technician the ticket by email or message, with media, location and slot.
+- The platform holds a **shared technician pool**. Landlords can also **add their own (custom) technicians**, who are only used for that landlord's buildings. Technicians set their own availability directly, through the private link in their emails.
+- The AI matches the tenant's availability against the landlord's own technicians first, then the shared pool, and **books the earliest fit**. It then sends the technician the ticket by email, with media, location and slot.
+- **Emergencies** skip the tenant step: the landlord books a technician directly (see §9, Modes).
 - **The landlord is not in the loop by default.** This was debated. One view: landlords always call the technician today and should keep control. The other: the tenant knows when they're home, so the AI should match directly. **Decision:** automatic by default, with manual mode available.
-- **Open question:** do portfolio landlords bring their own technicians into the pool, or is there one pool shared across landlords? It probably depends on the landlord.
 
 ## 11. AI classifier spec (MVP)
 
@@ -280,7 +291,7 @@ summary:         one sentence for the dashboard
 | For | Metric |
 |---|---|
 | **Tenant** (main KPI) | Time from the issue occurring to the issue being fixed. Shrink it as far as possible |
-| **Landlord** | Time and money saved on managing repairs. Longer tenant retention (good tenants staying past their lease) |
+| **Landlord** | Time and money saved on managing repairs. Longer tenant retention (good tenants staying past their lease). Costs and retention are not measured in the MVP |
 
 Both appear in the dashboard KPI bar.
 
@@ -300,7 +311,6 @@ Both appear in the dashboard KPI bar.
 
 ## 15. Open questions and risks
 
-- Own technicians vs. a shared pool per landlord?
 - Who pays for sensors upfront?
 - Data privacy for in-flat sensors and account tracking (GDPR/DSGVO, tenant consent).
 - False positives from sensors spamming tenants with confirmation requests.
