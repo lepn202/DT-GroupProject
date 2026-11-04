@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Foundations</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@500&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#0E5E4E}a:hover{color:#0A4A3D}
+</style>
+</helmet>
+<div style="width: 1440px; height: 1640px; box-sizing: border-box; padding: 72px 80px; background: #F6F6F2; color: #16201C; font-family: 'Hanken Grotesk', system-ui, sans-serif; display: flex; flex-direction: column; gap: 56px">
+
+<header style="display: flex; justify-content: space-between; align-items: flex-end; gap: 48px">
+<div style="display: flex; flex-direction: column; gap: 12px; max-width: 760px">
+<p style="margin: 0; font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: #4E5A55">Draft v0.1 · Web app MVP · [PRODUCT NAME]</p>
+<h1 style="margin: 0; font-size: 48px; line-height: 52px; font-weight: 700; letter-spacing: -0.02em">The building files the ticket before the tenant has to.</h1>
+<p style="margin: 0; font-size: 17px; line-height: 26px; color: #4E5A55">One system for two faces: a calm, mobile-first tenant app and a problem-first landlord dashboard. Tokens map 1:1 to Tailwind + shadcn/ui variables.</p>
+</div>
+<div style="display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end">
+<span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; padding: 6px 10px; border-radius: 999px; background: #FFFFFF; border: 1px solid #DADAD2">Next.js</span>
+<span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; padding: 6px 10px; border-radius: 999px; background: #FFFFFF; border: 1px solid #DADAD2">Tailwind</span>
+<span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; padding: 6px 10px; border-radius: 999px; background: #FFFFFF; border: 1px solid #DADAD2">shadcn/ui</span>
+<span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; padding: 6px 10px; border-radius: 999px; background: #FFFFFF; border: 1px solid #DADAD2">Recharts</span>
+</div>
+</header>
+
+<section style="display: flex; flex-direction: column; gap: 20px">
+<h2 style="margin: 0; font-size: 22px; line-height: 28px; font-weight: 600">Principles, from the evidence</h2>
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px">
+<div style="background: #FFFFFF; border: 1px solid #DADAD2; border-radius: 12px; padding: 20px; display: flex; flex-direction: column; gap: 8px">
+<p style="margin: 0; font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #4E5A55">01 · Issue 3</p>
+<h3 style="margin: 0; font-size: 17px; font-weight: 600">Acknowledge instantly</h3>
+<p style="margin: 0; font-size: 14px; line-height: 21px; color: #4E5A55">Every submission answers within a second: “Received, we’re on it.” Silence is the top complaint, not the repair.</p>
+</div>
+<div style="background: #FFFFFF; border: 1px solid #DADAD2; border-radius: 12px; padding: 20px; display: flex; flex-direction: column; gap: 8px">
+<p style="margin: 0; font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #4E5A55">02 · Issue 3, 4</p>
+<h3 style="margin: 0; font-size: 17px; font-weight: 600">Always show the stage</h3>
+<p style="margin: 0; font-size: 14px; line-height: 21px; color: #4E5A55">The four-stage tracker appears wherever a ticket does: logged, booked, in progress, resolved.</p>
+</div>
+<div style="background: #FFFFFF; border: 1px solid #DADAD2; border-radius: 12px; padding: 20px; display: flex; flex-direction: column; gap: 8px">
+<p style="margin: 0; font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #4E5A55">03 · Issue 6</p>
+<h3 style="margin: 0; font-size: 17px; font-weight: 600">Ask, so they don’t have to complain</h3>
+<p style="margin: 0; font-size: 14px; line-height: 21px; color: #4E5A55">The system asks first (“Is your room cold?”). One tap to confirm; one photo to report. No forms.</p>
+</div>
+<div style="background: #FFFFFF; border: 1px solid #DADAD2; border-radius: 12px; padding: 20px; display: flex; flex-direction: column; gap: 8px">
+<p style="margin: 0; font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #4E5A55">04 · Product §9</p>
+<h3 style="margin: 0; font-size: 17px; font-weight: 600">Problem-first for landlords</h3>
+<p style="margin: 0; font-size: 14px; line-height: 21px; color: #4E5A55">Issue, urgency and due time lead every row. Names and phone numbers live one level down.</p>
+</div>
+<div style="background: #FFFFFF; border: 1px solid #DADAD2; border-radius: 12px; padding: 20px; display: flex; flex-direction: column; gap: 8px">
+<p style="margin: 0; font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #4E5A55">05 · Issue 12</p>
+<h3 style="margin: 0; font-size: 17px; font-weight: 600">Urgency is never colour alone</h3>
+<p style="margin: 0; font-size: 14px; line-height: 21px; color: #4E5A55">Each level pairs a label, an icon shape and a hue of distinct lightness. Overdue is stated in words.</p>
+</div>
+<div style="background: #FFFFFF; border: 1px solid #DADAD2; border-radius: 12px; padding: 20px; display: flex; flex-direction: column; gap: 8px">
+<p style="margin: 0; font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #4E5A55">06 · Issue 5</p>
+<h3 style="margin: 0; font-size: 17px; font-weight: 600">One problem, one ticket</h3>
+<p style="margin: 0; font-size: 14px; line-height: 21px; color: #4E5A55">Building-wide issues get their own surface (the status bar) so neighbours see it’s known before they report it.</p>
+</div>
+</div>
+</section>
+
+<section style="display: flex; flex-direction: column; gap: 20px">
+<h2 style="margin: 0; font-size: 22px; line-height: 28px; font-weight: 600">Colour</h2>
+<div style="display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 12px">
+<div style="display: flex; flex-direction: column; gap: 8px"><div style="height: 72px; border-radius: 10px; background: #F6F6F2; border: 1px solid #DADAD2"></div><p style="margin: 0; font-size: 13px; font-weight: 600">background</p><p style="margin: 0; font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #4E5A55">#F6F6F2</p></div>
+<div style="display: flex; flex-direction: column; gap: 8px"><div style="height: 72px; border-radius: 10px; background: #FFFFFF; border: 1px solid #DADAD2"></div><p style="margin: 0; font-size: 13px; font-weight: 600">card</p><p style="margin: 0; font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #4E5A55">#FFFFFF</p></div>
+<div style="display: flex; flex-direction: column; gap: 8px"><div style="height: 72px; border-radius: 10px; background: #EDEDE6"></div><p style="margin: 0; font-size: 13px; font-weight: 600">muted</p><p style="margin: 0; font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #4E5A55">#EDEDE6</p></div>
+<div style="display: flex; flex-direction: column; gap: 8px"><div style="height: 72px; border-radius: 10px; background: #DADAD2"></div><p style="margin: 0; font-size: 13px; font-weight: 600">border</p><p style="margin: 0; font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #4E5A55">#DADAD2</p></div>
+<div style="display: flex; flex-direction: column; gap: 8px"><div style="height: 72px; border-radius: 10px; background: #4E5A55"></div><p style="margin: 0; font-size: 13px; font-weight: 600">muted-foreground</p><p style="margin: 0; font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #4E5A55">#4E5A55 · 6.8:1</p></div>
+<div style="display: flex; flex-direction: column; gap: 8px"><div style="height: 72px; border-radius: 10px; background: #16201C"></div><p style="margin: 0; font-size: 13px; font-weight: 600">foreground</p><p style="margin: 0; font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #4E5A55">#16201C · 16:1</p></div>
+<div style="display: flex; flex-direction: column; gap: 8px"><div style="height: 72px; border-radius: 10px; background: {{primary}}"></div><p style="margin: 0; font-size: 13px; font-weight: 600">primary</p><p style="margin: 0; font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #4E5A55">{{primary}} · 7.4:1</p></div>
+<div style="display: flex; flex-direction: column; gap: 8px"><div style="height: 72px; border-radius: 10px; background: #DCEFE9"></div><p style="margin: 0; font-size: 13px; font-weight: 600">primary-soft</p><p style="margin: 0; font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #4E5A55">#DCEFE9</p></div>
+</div>
+
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px">
+<div style="background: #FFFFFF; border: 1px solid #DADAD2; border-radius: 12px; padding: 20px; display: flex; flex-direction: column; gap: 14px">
+<p style="margin: 0; font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: #4E5A55">Urgency · classifier output</p>
+<div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px">
+<div style="display: flex; flex-direction: column; gap: 6px"><div style="height: 48px; border-radius: 8px; background: #B42318"></div><p style="margin: 0; font-size: 13px; font-weight: 600">Emergency</p><p style="margin: 0; font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #4E5A55">#B42318 / #FDE8E6</p></div>
+<div style="display: flex; flex-direction: column; gap: 6px"><div style="height: 48px; border-radius: 8px; background: #C4570A"></div><p style="margin: 0; font-size: 13px; font-weight: 600">High</p><p style="margin: 0; font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #4E5A55">#C4570A / #FDEEDC</p></div>
+<div style="display: flex; flex-direction: column; gap: 6px"><div style="height: 48px; border-radius: 8px; background: #E3B341"></div><p style="margin: 0; font-size: 13px; font-weight: 600">Medium</p><p style="margin: 0; font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #4E5A55">#E3B341 · text #6E5100</p></div>
+<div style="display: flex; flex-direction: column; gap: 6px"><div style="height: 48px; border-radius: 8px; background: #B7BEC8"></div><p style="margin: 0; font-size: 13px; font-weight: 600">Low</p><p style="margin: 0; font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #4E5A55">#B7BEC8 · text #475467</p></div>
+</div>
+<p style="margin: 0; font-size: 13px; line-height: 19px; color: #4E5A55">Steps darken as urgency rises, so the scale reads in greyscale. Text on tints uses the darker value.</p>
+</div>
+<div style="background: #FFFFFF; border: 1px solid #DADAD2; border-radius: 12px; padding: 20px; display: flex; flex-direction: column; gap: 14px">
+<p style="margin: 0; font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: #4E5A55">Ticket stage · tenant-facing</p>
+<div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px">
+<div style="display: flex; flex-direction: column; gap: 6px"><div style="height: 48px; border-radius: 8px; background: #EDEDE6; border: 1px solid #DADAD2"></div><p style="margin: 0; font-size: 13px; font-weight: 600">1 · Logged</p><p style="margin: 0; font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #4E5A55">logged, confirmed, quick_fix</p></div>
+<div style="display: flex; flex-direction: column; gap: 6px"><div style="height: 48px; border-radius: 8px; background: #DCE6FB"></div><p style="margin: 0; font-size: 13px; font-weight: 600">2 · Booked</p><p style="margin: 0; font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #4E5A55">booked · #1F4FBF</p></div>
+<div style="display: flex; flex-direction: column; gap: 6px"><div style="height: 48px; border-radius: 8px; background: #1F4FBF"></div><p style="margin: 0; font-size: 13px; font-weight: 600">3 · In progress</p><p style="margin: 0; font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #4E5A55">in_progress</p></div>
+<div style="display: flex; flex-direction: column; gap: 6px"><div style="height: 48px; border-radius: 8px; background: {{primary}}"></div><p style="margin: 0; font-size: 13px; font-weight: 600">4 · Resolved</p><p style="margin: 0; font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #4E5A55">resolved · primary</p></div>
+</div>
+<p style="margin: 0; font-size: 13px; line-height: 19px; color: #4E5A55">Stages use blue and green so they never compete with urgency’s red–amber range.</p>
+</div>
+</div>
+</section>
+
+<section style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 48px">
+<div style="display: flex; flex-direction: column; gap: 20px">
+<h2 style="margin: 0; font-size: 22px; line-height: 28px; font-weight: 600">Type · Hanken Grotesk + IBM Plex Mono</h2>
+<div style="background: #FFFFFF; border: 1px solid #DADAD2; border-radius: 12px; padding: 8px 20px; display: flex; flex-direction: column">
+<div style="display: flex; align-items: baseline; justify-content: space-between; gap: 16px; padding: 14px 0; border-bottom: 1px solid #EDEDE6"><span style="font-size: 40px; line-height: 44px; font-weight: 700; letter-spacing: -0.02em">Display</span><span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #4E5A55">40/44 · 700</span></div>
+<div style="display: flex; align-items: baseline; justify-content: space-between; gap: 16px; padding: 14px 0; border-bottom: 1px solid #EDEDE6"><span style="font-size: 28px; line-height: 34px; font-weight: 700; letter-spacing: -0.01em">Heading 1</span><span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #4E5A55">28/34 · 700</span></div>
+<div style="display: flex; align-items: baseline; justify-content: space-between; gap: 16px; padding: 14px 0; border-bottom: 1px solid #EDEDE6"><span style="font-size: 20px; line-height: 28px; font-weight: 600">Heading 2 · Water leak</span><span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #4E5A55">20/28 · 600</span></div>
+<div style="display: flex; align-items: baseline; justify-content: space-between; gap: 16px; padding: 14px 0; border-bottom: 1px solid #EDEDE6"><span style="font-size: 16px; line-height: 24px; font-weight: 400">Body · The pipe under my sink is dripping.</span><span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #4E5A55">16/24 · 400</span></div>
+<div style="display: flex; align-items: baseline; justify-content: space-between; gap: 16px; padding: 14px 0; border-bottom: 1px solid #EDEDE6"><span style="font-size: 14px; line-height: 20px; color: #4E5A55">Small · Reported 2 h ago by Flat 4B</span><span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #4E5A55">14/20 · 400</span></div>
+<div style="display: flex; align-items: baseline; justify-content: space-between; gap: 16px; padding: 14px 0; border-bottom: 1px solid #EDEDE6"><span style="font-size: 12px; line-height: 16px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: #4E5A55">Label · Open tickets</span><span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #4E5A55">12/16 · 600 · caps</span></div>
+<div style="display: flex; align-items: baseline; justify-content: space-between; gap: 16px; padding: 14px 0"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; font-weight: 500">TCK-0142 · 12.11 09:00</span><span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #4E5A55">Mono 13 · IDs, times, data</span></div>
+</div>
+<p style="margin: 0; font-size: 13px; line-height: 19px; color: #4E5A55">Tenant app body is 16 px minimum (no zoom on iOS inputs). Dashboard tables may use 14 px.</p>
+</div>
+
+<div style="display: flex; flex-direction: column; gap: 20px">
+<h2 style="margin: 0; font-size: 22px; line-height: 28px; font-weight: 600">Space, radius, elevation</h2>
+<div style="background: #FFFFFF; border: 1px solid #DADAD2; border-radius: 12px; padding: 20px; display: flex; flex-direction: column; gap: 12px">
+<p style="margin: 0; font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: #4E5A55">Spacing · 4 px base</p>
+<div style="display: flex; align-items: flex-end; gap: 18px">
+<div style="display: flex; flex-direction: column; align-items: center; gap: 6px"><div style="width: 4px; height: 4px; background: {{primary}}"></div><span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px">4</span></div>
+<div style="display: flex; flex-direction: column; align-items: center; gap: 6px"><div style="width: 8px; height: 8px; background: {{primary}}"></div><span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px">8</span></div>
+<div style="display: flex; flex-direction: column; align-items: center; gap: 6px"><div style="width: 12px; height: 12px; background: {{primary}}"></div><span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px">12</span></div>
+<div style="display: flex; flex-direction: column; align-items: center; gap: 6px"><div style="width: 16px; height: 16px; background: {{primary}}"></div><span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px">16</span></div>
+<div style="display: flex; flex-direction: column; align-items: center; gap: 6px"><div style="width: 24px; height: 24px; background: {{primary}}"></div><span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px">24</span></div>
+<div style="display: flex; flex-direction: column; align-items: center; gap: 6px"><div style="width: 32px; height: 32px; background: {{primary}}"></div><span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px">32</span></div>
+<div style="display: flex; flex-direction: column; align-items: center; gap: 6px"><div style="width: 48px; height: 48px; background: {{primary}}"></div><span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px">48</span></div>
+<div style="display: flex; flex-direction: column; align-items: center; gap: 6px"><div style="width: 64px; height: 64px; background: {{primary}}"></div><span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px">64</span></div>
+</div>
+</div>
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px">
+<div style="background: #FFFFFF; border: 1px solid #DADAD2; border-radius: 12px; padding: 20px; display: flex; flex-direction: column; gap: 12px">
+<p style="margin: 0; font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: #4E5A55">Radius</p>
+<div style="display: flex; gap: 12px; align-items: center">
+<div style="width: 48px; height: 48px; border-radius: 6px; background: #EDEDE6; border: 1px solid #DADAD2"></div>
+<div style="width: 48px; height: 48px; border-radius: 12px; background: #EDEDE6; border: 1px solid #DADAD2"></div>
+<div style="width: 48px; height: 48px; border-radius: 20px; background: #EDEDE6; border: 1px solid #DADAD2"></div>
+<div style="width: 48px; height: 48px; border-radius: 999px; background: #EDEDE6; border: 1px solid #DADAD2"></div>
+</div>
+<p style="margin: 0; font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #4E5A55">6 inputs · 12 cards · 20 sheets · full pills</p>
+</div>
+<div style="background: #FFFFFF; border: 1px solid #DADAD2; border-radius: 12px; padding: 20px; display: flex; flex-direction: column; gap: 12px">
+<p style="margin: 0; font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: #4E5A55">Elevation</p>
+<div style="display: flex; gap: 16px; align-items: center">
+<div style="width: 64px; height: 48px; border-radius: 12px; background: #FFFFFF; border: 1px solid #DADAD2"></div>
+<div style="width: 64px; height: 48px; border-radius: 12px; background: #FFFFFF; box-shadow: 0 1px 2px rgba(22,32,28,0.06), 0 4px 12px rgba(22,32,28,0.08)"></div>
+<div style="width: 64px; height: 48px; border-radius: 12px; background: #FFFFFF; box-shadow: 0 8px 28px rgba(22,32,28,0.16)"></div>
+</div>
+<p style="margin: 0; font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #4E5A55">0 border · 1 raised · 2 sheet / popover</p>
+</div>
+</div>
+<div style="background: #FFFFFF; border: 1px solid #DADAD2; border-radius: 12px; padding: 20px; display: flex; flex-direction: column; gap: 8px">
+<p style="margin: 0; font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: #4E5A55">Icons</p>
+<p style="margin: 0; font-size: 14px; line-height: 21px; color: #4E5A55">Lucide (ships with shadcn/ui), 1.75 px stroke, 20 px in UI, 24 px in the tenant bottom nav. Issue types: droplet (water), flame (heating), cloud-drizzle (mould), zap (electricity), wrench (defect).</p>
+</div>
+</div>
+</section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"primary":{"editor":"color","default":"#0E5E4E","options":["#0E5E4E","#1F4FBF","#5B3FA6","#16201C"]},"$preview":{"width":1440,"height":1640}}'>
+class Component extends DCLogic {
+renderVals() {
+return { primary: this.props.primary ?? '#0E5E4E' };
+}
+}
+</script>
+</body>
+</html>

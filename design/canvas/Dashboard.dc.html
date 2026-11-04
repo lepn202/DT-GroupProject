@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Building view</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@500&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#0E5E4E}a:hover{color:#0A4A3D}
+button,input{font-family:inherit}
+</style>
+</helmet>
+<div style="width: 100%; min-height: 980px; box-sizing: border-box; background: #F6F6F2; color: #16201C; font-family: 'Hanken Grotesk', system-ui, sans-serif; display: flex; flex-wrap: wrap; align-items: stretch">
+
+<aside style="flex: 1 1 220px; max-width: 100%; box-sizing: border-box; padding: 24px 16px; background: #FFFFFF; border-right: 1px solid #DADAD2; display: flex; flex-direction: column; gap: 24px">
+<span style="font-size: 16px; font-weight: 700; padding: 0 8px">[PRODUCT NAME]</span>
+<nav aria-label="Dashboard" style="display: flex; flex-direction: column; gap: 4px">
+<a href="#" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 10px; border-radius: 8px; color: #16201C; text-decoration: none; font-size: 15px; font-weight: 500"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"></rect><rect x="14" y="3" width="7" height="7" rx="1"></rect><rect x="3" y="14" width="7" height="7" rx="1"></rect><rect x="14" y="14" width="7" height="7" rx="1"></rect></svg>Portfolio</a>
+<a href="#" aria-current="page" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 10px; border-radius: 8px; background: #DCEFE9; color: #0A4A3D; text-decoration: none; font-size: 15px; font-weight: 700"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18z"></path><path d="M10 6h4M10 10h4M10 14h4M10 18h4"></path></svg>Alexanderplatz 1</a>
+<a href="#" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 10px; border-radius: 8px; color: #16201C; text-decoration: none; font-size: 15px; font-weight: 500"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"></path></svg>Settings</a>
+</nav>
+<div style="margin-top: auto; padding: 12px; border-radius: 10px; background: #F6F6F2; display: flex; flex-direction: column; gap: 4px">
+<span style="font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: #4E5A55">Mode</span>
+<span style="display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600"><span style="width: 8px; height: 8px; border-radius: 999px; background: {{primary}}"></span>Automatic</span>
+<span style="font-size: 13px; line-height: 18px; color: #4E5A55">The AI books technicians. You monitor.</span>
+</div>
+</aside>
+
+<main style="flex: 999 1 560px; min-width: 0; box-sizing: border-box; padding: 32px 40px; display: flex; flex-direction: column; gap: 24px">
+<header style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 16px">
+<div style="display: flex; flex-direction: column; gap: 4px">
+<span style="font-size: 13px; color: #4E5A55"><a href="#" style="color: #4E5A55">Portfolio</a> / Building</span>
+<h1 style="margin: 0; font-size: 28px; line-height: 34px; font-weight: 700; letter-spacing: -0.01em">Alexanderplatz 1</h1>
+<span style="font-size: 14px; color: #4E5A55">[ADDRESS] · [N] units</span>
+</div>
+<button type="button" style="height: 44px; padding: 0 16px; border: 1px solid #DADAD2; border-radius: 8px; background: #FFFFFF; color: #16201C; font-size: 15px; font-weight: 600">Invite tenants</button>
+</header>
+
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px">
+<div style="padding: 16px; border-radius: 12px; border: 1px solid #DADAD2; background: #FFFFFF; display: flex; flex-direction: column; gap: 6px"><span style="font-size: 13px; color: #4E5A55">Time from issue to fix</span><span style="font-size: 28px; line-height: 32px; font-weight: 700">[X.X] d</span><span style="font-size: 12px; color: #4E5A55">Main KPI · median, 30 days</span></div>
+<div style="padding: 16px; border-radius: 12px; border: 1px solid #DADAD2; background: #FFFFFF; display: flex; flex-direction: column; gap: 6px"><span style="font-size: 13px; color: #4E5A55">Open / resolved</span><span style="font-size: 28px; line-height: 32px; font-weight: 700">6 / [N]</span><span style="font-size: 12px; color: #4E5A55">This building</span></div>
+<div style="padding: 16px; border-radius: 12px; border: 1px solid #F3B8B1; background: #FFF7F6; display: flex; flex-direction: column; gap: 6px"><span style="font-size: 13px; color: #9A1C12; font-weight: 600">Overdue</span><span style="font-size: 28px; line-height: 32px; font-weight: 700; color: #9A1C12">1</span><span style="font-size: 12px; color: #9A1C12">Past target time</span></div>
+<div style="padding: 16px; border-radius: 12px; border: 1px solid #DADAD2; background: #FFFFFF; display: flex; flex-direction: column; gap: 6px"><span style="font-size: 13px; color: #4E5A55">Handled without you</span><span style="font-size: 28px; line-height: 32px; font-weight: 700">[NN] %</span><span style="font-size: 12px; color: #4E5A55">No landlord action needed</span></div>
+</div>
+
+<div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px">
+<div style="padding: 12px 14px; border-radius: 10px; background: #FFFFFF; border: 1px solid #DADAD2; display: flex; justify-content: space-between; align-items: center"><span style="display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 500"><span style="width: 8px; height: 8px; border-radius: 999px; border: 1.5px solid #4E5A55; box-sizing: border-box"></span>Logged</span><span style="font-family: 'IBM Plex Mono', monospace; font-size: 15px">2</span></div>
+<div style="padding: 12px 14px; border-radius: 10px; background: #FFFFFF; border: 1px solid #DADAD2; display: flex; justify-content: space-between; align-items: center"><span style="display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 500"><span style="width: 8px; height: 8px; border-radius: 999px; background: #8FA8E8"></span>Booked</span><span style="font-family: 'IBM Plex Mono', monospace; font-size: 15px">3</span></div>
+<div style="padding: 12px 14px; border-radius: 10px; background: #FFFFFF; border: 1px solid #DADAD2; display: flex; justify-content: space-between; align-items: center"><span style="display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 500"><span style="width: 8px; height: 8px; border-radius: 999px; background: #1F4FBF"></span>In progress</span><span style="font-family: 'IBM Plex Mono', monospace; font-size: 15px">1</span></div>
+<div style="padding: 12px 14px; border-radius: 10px; background: #FFFFFF; border: 1px solid #DADAD2; display: flex; justify-content: space-between; align-items: center"><span style="display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 500"><span style="width: 8px; height: 8px; border-radius: 999px; background: {{primary}}"></span>Resolved</span><span style="font-family: 'IBM Plex Mono', monospace; font-size: 15px">[N]</span></div>
+</div>
+
+<section style="display: flex; flex-direction: column; gap: 10px">
+<div style="display: flex; justify-content: space-between; align-items: baseline"><h2 style="margin: 0; font-size: 20px; line-height: 28px; font-weight: 600">Problems</h2><span style="font-size: 13px; color: #4E5A55">Ranked by urgency, then due time</span></div>
+<div style="overflow-x: auto; border: 1px solid #DADAD2; border-radius: 12px; background: #FFFFFF">
+<table style="width: 100%; min-width: 760px; border-collapse: collapse; font-size: 14px">
+<thead><tr style="text-align: left; color: #4E5A55; font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase"><th style="padding: 12px 16px; font-weight: 600">Urgency</th><th style="padding: 12px 16px; font-weight: 600">Issue</th><th style="padding: 12px 16px; font-weight: 600">Stage</th><th style="padding: 12px 16px; font-weight: 600">Appointment</th><th style="padding: 12px 16px; font-weight: 600">Due</th></tr></thead>
+<tbody>
+<tr style="border-top: 1px solid #EDEDE6"><td style="padding: 14px 16px"><span style="display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 10px; border-radius: 999px; background: #FDE8E6; color: #9A1C12; font-size: 13px; font-weight: 600"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2 1 21h22L12 2zm1 15h-2v-2h2v2zm0-4h-2V9h2v4z"></path></svg>Emergency</span></td><td style="padding: 14px 16px"><a href="#" style="color: #16201C; font-weight: 600; text-decoration: none">Water leak · ceiling</a><div style="font-size: 13px; color: #4E5A55">Flat 1B · linked to Flat 2B</div></td><td style="padding: 14px 16px"><span style="display: inline-flex; align-items: center; gap: 6px"><span style="width: 8px; height: 8px; border-radius: 999px; background: #8FA8E8"></span>Booked</span></td><td style="padding: 14px 16px; font-family: 'IBM Plex Mono', monospace; font-size: 13px">Today 14:00 · plumber</td><td style="padding: 14px 16px"><span style="display: inline-flex; align-items: center; height: 24px; padding: 0 8px; border-radius: 4px; border: 1px solid #C4570A; color: #8F3E06; font-size: 12px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase">Due in 4 h</span></td></tr>
+<tr style="border-top: 1px solid #EDEDE6"><td style="padding: 14px 16px"><span style="display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 10px; border-radius: 999px; background: #FDEEDC; color: #8F3E06; font-size: 13px; font-weight: 600"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 11 6-6 6 6"></path><path d="m6 19 6-6 6 6"></path></svg>High</span></td><td style="padding: 14px 16px"><a href="#" style="color: #16201C; font-weight: 600; text-decoration: none">Boiler · whole building</a><div style="font-size: 13px; color: #4E5A55">6 flats merged · sensor + tenant reports</div></td><td style="padding: 14px 16px"><span style="display: inline-flex; align-items: center; gap: 6px"><span style="width: 8px; height: 8px; border-radius: 999px; background: #8FA8E8"></span>Booked</span></td><td style="padding: 14px 16px; font-family: 'IBM Plex Mono', monospace; font-size: 13px">Thu 08:00 · heating</td><td style="padding: 14px 16px"><span style="display: inline-flex; align-items: center; height: 24px; padding: 0 8px; border-radius: 4px; background: #B42318; color: #FFFFFF; font-size: 12px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase">Overdue 3 h</span></td></tr>
+<tr style="border-top: 1px solid #EDEDE6"><td style="padding: 14px 16px"><span style="display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 10px; border-radius: 999px; background: #FDEEDC; color: #8F3E06; font-size: 13px; font-weight: 600"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 11 6-6 6 6"></path><path d="m6 19 6-6 6 6"></path></svg>High</span></td><td style="padding: 14px 16px"><a href="#" style="color: #16201C; font-weight: 600; text-decoration: none">Leak under kitchen sink</a><div style="font-size: 13px; color: #4E5A55">Flat 4B · voice memo + video</div></td><td style="padding: 14px 16px"><span style="display: inline-flex; align-items: center; gap: 6px"><span style="width: 8px; height: 8px; border-radius: 999px; background: #8FA8E8"></span>Booked</span></td><td style="padding: 14px 16px; font-family: 'IBM Plex Mono', monospace; font-size: 13px">Thu 12.11 08:00 · plumber</td><td style="padding: 14px 16px"><span style="display: inline-flex; align-items: center; height: 24px; padding: 0 8px; border-radius: 4px; border: 1px solid #C4570A; color: #8F3E06; font-size: 12px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase">Due in 20 h</span></td></tr>
+<tr style="border-top: 1px solid #EDEDE6"><td style="padding: 14px 16px"><span style="display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 10px; border-radius: 999px; background: #FBF1D3; color: #6E5100; font-size: 13px; font-weight: 600"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 15 6-6 6 6"></path></svg>Medium</span></td><td style="padding: 14px 16px"><a href="#" style="color: #16201C; font-weight: 600; text-decoration: none">Damp wall · bedroom</a><div style="font-size: 13px; color: #4E5A55">Flat 3A · humidity sensor, confirmed</div></td><td style="padding: 14px 16px"><span style="display: inline-flex; align-items: center; gap: 6px"><span style="width: 8px; height: 8px; border-radius: 999px; background: #1F4FBF"></span>In progress</span></td><td style="padding: 14px 16px; font-family: 'IBM Plex Mono', monospace; font-size: 13px">On site now · handyman</td><td style="padding: 14px 16px; font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #4E5A55">Due 02.12</td></tr>
+<tr style="border-top: 1px solid #EDEDE6"><td style="padding: 14px 16px"><span style="display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 10px; border-radius: 999px; background: #EEF0F3; color: #475467; font-size: 13px; font-weight: 600"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M6 12h12"></path></svg>Low</span></td><td style="padding: 14px 16px"><a href="#" style="color: #16201C; font-weight: 600; text-decoration: none">Door hinge loose</a><div style="font-size: 13px; color: #4E5A55">Flat 2C · photo</div></td><td style="padding: 14px 16px"><span style="display: inline-flex; align-items: center; gap: 6px"><span style="width: 8px; height: 8px; border-radius: 999px; border: 1.5px solid #4E5A55; box-sizing: border-box"></span>Logged</span></td><td style="padding: 14px 16px; font-size: 13px; color: #4E5A55">Awaiting tenant slots</td><td style="padding: 14px 16px; font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #4E5A55">Due 30.11</td></tr>
+<tr style="border-top: 1px solid #EDEDE6"><td style="padding: 14px 16px"><span style="display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 10px; border-radius: 999px; background: #EEF0F3; color: #475467; font-size: 13px; font-weight: 600"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M6 12h12"></path></svg>Low</span></td><td style="padding: 14px 16px"><a href="#" style="color: #16201C; font-weight: 600; text-decoration: none">Scraped paint · hallway</a><div style="font-size: 13px; color: #4E5A55">Flat 5A · quick fix sent by chatbot</div></td><td style="padding: 14px 16px"><span style="display: inline-flex; align-items: center; gap: 6px"><span style="width: 8px; height: 8px; border-radius: 999px; border: 1.5px solid #4E5A55; box-sizing: border-box"></span>Logged</span></td><td style="padding: 14px 16px; font-size: 13px; color: #4E5A55">Next planned visit</td><td style="padding: 14px 16px; font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #4E5A55">Due 02.12</td></tr>
+</tbody>
+</table>
+</div>
+</section>
+
+<form style="margin-top: auto; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; padding: 12px; border-radius: 12px; background: #FFFFFF; border: 1px solid #DADAD2; box-shadow: 0 1px 2px rgba(22,32,28,0.06), 0 4px 12px rgba(22,32,28,0.08)">
+<label for="d-msg" style="font-size: 14px; font-weight: 600; padding: 0 4px">Message all tenants</label>
+<input id="d-msg" type="text" placeholder="e.g. Heating technician coming Thursday." style="flex: 1 1 280px; min-width: 0; box-sizing: border-box; height: 44px; padding: 0 12px; border: 1px solid #DADAD2; border-radius: 6px; font-size: 15px; color: #16201C">
+<button type="button" style="height: 44px; padding: 0 18px; border: 0; border-radius: 8px; background: {{primary}}; color: #FFFFFF; font-size: 15px; font-weight: 600">Send broadcast</button>
+</form>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"primary":{"editor":"color","default":"#0E5E4E","options":["#0E5E4E","#1F4FBF","#5B3FA6","#16201C"]},"$preview":{"width":1440,"height":980}}'>
+class Component extends DCLogic {
+renderVals() {
+return { primary: this.props.primary ?? '#0E5E4E' };
+}
+}
+</script>
+</body>
+</html>

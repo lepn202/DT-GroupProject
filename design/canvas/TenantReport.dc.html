@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Add ticket</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@500&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#0E5E4E}a:hover{color:#0A4A3D}
+button{font-family:inherit}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; background: #F6F6F2; color: #16201C; font-family: 'Hanken Grotesk', system-ui, sans-serif; display: flex; flex-direction: column; overflow: hidden">
+
+<main style="flex: 1; padding: 16px 16px 16px; display: flex; flex-direction: column; gap: 20px">
+<div style="display: flex; align-items: center; gap: 4px">
+<a href="TenantHome.dc.html" aria-label="Back to Home" style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; color: #16201C; margin-left: -10px"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg></a>
+<span style="font-size: 13px; color: #4E5A55">Flat 4B · Alexanderplatz 1</span>
+</div>
+
+<div style="display: flex; flex-direction: column; gap: 6px">
+<h1 style="margin: 0; font-size: 28px; line-height: 34px; font-weight: 700; letter-spacing: -0.01em">What’s wrong?</h1>
+<p style="margin: 0; font-size: 16px; line-height: 24px; color: #4E5A55">Show us or tell us. We’ll work out the rest, no forms.</p>
+</div>
+
+<div style="display: flex; flex-direction: column; gap: 10px">
+<button type="button" style="height: 88px; border: 0; border-radius: 16px; background: {{primary}}; color: #FFFFFF; display: flex; align-items: center; gap: 16px; padding: 0 20px; text-align: left"><span style="width: 48px; height: 48px; border-radius: 12px; background: rgba(255,255,255,0.16); display: flex; align-items: center; justify-content: center"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3z"></path><circle cx="12" cy="13" r="3"></circle></svg></span><span style="display: flex; flex-direction: column; gap: 2px"><span style="font-size: 17px; font-weight: 600">Take a photo</span><span style="font-size: 13px; opacity: 0.85">Fastest way to report</span></span></button>
+<button type="button" style="height: 88px; border: 1px solid #DADAD2; border-radius: 16px; background: #FFFFFF; color: #16201C; display: flex; align-items: center; gap: 16px; padding: 0 20px; text-align: left"><span style="width: 48px; height: 48px; border-radius: 12px; background: #EDEDE6; display: flex; align-items: center; justify-content: center"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m16 13 5.2 3.5a.5.5 0 0 0 .8-.4V7.9a.5.5 0 0 0-.8-.4L16 11"></path><rect x="2" y="6" width="14" height="12" rx="2"></rect></svg></span><span style="display: flex; flex-direction: column; gap: 2px"><span style="font-size: 17px; font-weight: 600">Record a video</span><span style="font-size: 13px; color: #4E5A55">Up to 30 seconds</span></span></button>
+<button type="button" style="height: 88px; border: 1px solid #DADAD2; border-radius: 16px; background: #FFFFFF; color: #16201C; display: flex; align-items: center; gap: 16px; padding: 0 20px; text-align: left"><span style="width: 48px; height: 48px; border-radius: 12px; background: #EDEDE6; display: flex; align-items: center; justify-content: center"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="2" width="6" height="12" rx="3"></rect><path d="M19 10v1a7 7 0 0 1-14 0v-1"></path><path d="M12 18v4"></path></svg></span><span style="display: flex; flex-direction: column; gap: 2px"><span style="font-size: 17px; font-weight: 600">Record a voice memo</span><span style="font-size: 13px; color: #4E5A55">Just say what happened</span></span></button>
+</div>
+
+<div style="display: flex; flex-direction: column; gap: 6px">
+<label for="r-desc" style="font-size: 14px; font-weight: 600">Anything to add? <span style="font-weight: 400; color: #4E5A55">Optional</span></label>
+<textarea id="r-desc" rows="3" placeholder="e.g. Water on the floor since this morning" style="box-sizing: border-box; width: 100%; padding: 12px; border: 1px solid #DADAD2; border-radius: 6px; font-family: inherit; font-size: 16px; resize: none; background: #FFFFFF; color: #16201C"></textarea>
+</div>
+
+<div role="status" style="margin-top: auto; display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-radius: 12px; background: #16201C; color: #FFFFFF; box-shadow: 0 8px 28px rgba(22,32,28,0.16)">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#7FD1B9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>
+<div style="display: flex; flex-direction: column; gap: 2px"><span style="font-size: 15px; font-weight: 600">Received, we’re on it</span><span style="font-size: 13px; color: #C9D1CD">Shown on upload · ticket now on Home</span></div>
+</div>
+</main>
+
+<nav aria-label="Main" style="display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); border-top: 1px solid #DADAD2; background: #FFFFFF; padding: 6px 4px 18px">
+<a href="TenantHome.dc.html" style="display: flex; flex-direction: column; align-items: center; gap: 4px; min-height: 52px; justify-content: center; color: #4E5A55; text-decoration: none; font-size: 11px; font-weight: 500"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"></path></svg>Home</a>
+<a href="#" aria-current="page" style="display: flex; flex-direction: column; align-items: center; gap: 4px; min-height: 52px; justify-content: center; color: {{primary}}; text-decoration: none; font-size: 11px; font-weight: 700"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 8v8M8 12h8"></path></svg>Add</a>
+<a href="#" style="display: flex; flex-direction: column; align-items: center; gap: 4px; min-height: 52px; justify-content: center; color: #4E5A55; text-decoration: none; font-size: 11px; font-weight: 500"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>History</a>
+<a href="#" style="display: flex; flex-direction: column; align-items: center; gap: 4px; min-height: 52px; justify-content: center; color: #4E5A55; text-decoration: none; font-size: 11px; font-weight: 500"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="8" r="4"></circle><path d="M4 21a8 8 0 0 1 16 0"></path></svg>Profile</a>
+<a href="#" style="display: flex; flex-direction: column; align-items: center; gap: 4px; min-height: 52px; justify-content: center; color: #4E5A55; text-decoration: none; font-size: 11px; font-weight: 500"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>Messages</a>
+</nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"primary":{"editor":"color","default":"#0E5E4E","options":["#0E5E4E","#1F4FBF","#5B3FA6","#16201C"]},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() {
+return { primary: this.props.primary ?? '#0E5E4E' };
+}
+}
+</script>
+</body>
+</html>

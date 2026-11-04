@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Components</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@500&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#0E5E4E}a:hover{color:#0A4A3D}
+button{font-family:inherit}
+</style>
+</helmet>
+<div style="width: 1440px; height: 2000px; box-sizing: border-box; padding: 72px 80px; background: #F6F6F2; color: #16201C; font-family: 'Hanken Grotesk', system-ui, sans-serif; display: flex; flex-direction: column; gap: 40px">
+
+<header style="display: flex; flex-direction: column; gap: 8px">
+<p style="margin: 0; font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: #4E5A55">Draft v0.1 · Components</p>
+<h1 style="margin: 0; font-size: 40px; line-height: 44px; font-weight: 700; letter-spacing: -0.02em">Core components</h1>
+<p style="margin: 0; font-size: 16px; line-height: 24px; color: #4E5A55; max-width: 760px">Built on shadcn/ui primitives (Button, Badge, Card, Input, Progress). Product-specific pieces below map to screens in product.md §8–9.</p>
+</header>
+
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px">
+
+<section style="background: #FFFFFF; border: 1px solid #DADAD2; border-radius: 12px; padding: 24px; display: flex; flex-direction: column; gap: 16px">
+<p style="margin: 0; font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: #4E5A55">Buttons</p>
+<div style="display: flex; flex-wrap: wrap; gap: 10px">
+<button type="button" style="height: 44px; padding: 0 18px; border: 0; border-radius: 8px; background: {{primary}}; color: #FFFFFF; font-size: 15px; font-weight: 600">Confirm slot</button>
+<button type="button" style="height: 44px; padding: 0 18px; border: 1px solid #DADAD2; border-radius: 8px; background: #FFFFFF; color: #16201C; font-size: 15px; font-weight: 600">Reschedule</button>
+<button type="button" style="height: 44px; padding: 0 14px; border: 0; border-radius: 8px; background: transparent; color: #16201C; font-size: 15px; font-weight: 600">Cancel</button>
+<button type="button" style="height: 44px; padding: 0 18px; border: 0; border-radius: 8px; background: #B42318; color: #FFFFFF; font-size: 15px; font-weight: 600">Dismiss alert</button>
+<button type="button" disabled style="height: 44px; padding: 0 18px; border: 0; border-radius: 8px; background: #EDEDE6; color: #4E5A55; font-size: 15px; font-weight: 600">Disabled</button>
+</div>
+<p style="margin: 0; font-size: 13px; line-height: 19px; color: #4E5A55">44 px minimum height everywhere. One primary per view.</p>
+<p style="margin: 0; font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: #4E5A55">Media action · tenant</p>
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px">
+<button type="button" style="height: 96px; border: 0; border-radius: 16px; background: {{primary}}; color: #FFFFFF; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; font-size: 14px; font-weight: 600"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3z"></path><circle cx="12" cy="13" r="3"></circle></svg>Photo</button>
+<button type="button" style="height: 96px; border: 1px solid #DADAD2; border-radius: 16px; background: #FFFFFF; color: #16201C; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; font-size: 14px; font-weight: 600"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m16 13 5.2 3.5a.5.5 0 0 0 .8-.4V7.9a.5.5 0 0 0-.8-.4L16 11"></path><rect x="2" y="6" width="14" height="12" rx="2"></rect></svg>Video</button>
+<button type="button" style="height: 96px; border: 1px solid #DADAD2; border-radius: 16px; background: #FFFFFF; color: #16201C; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; font-size: 14px; font-weight: 600"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="2" width="6" height="12" rx="3"></rect><path d="M19 10v1a7 7 0 0 1-14 0v-1"></path><path d="M12 18v4"></path></svg>Voice memo</button>
+</div>
+</section>
+
+<section style="background: #FFFFFF; border: 1px solid #DADAD2; border-radius: 12px; padding: 24px; display: flex; flex-direction: column; gap: 16px">
+<p style="margin: 0; font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: #4E5A55">Urgency badges</p>
+<div style="display: flex; flex-wrap: wrap; gap: 8px">
+<span style="display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 10px; border-radius: 999px; background: #FDE8E6; color: #9A1C12; font-size: 13px; font-weight: 600"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2 1 21h22L12 2zm1 15h-2v-2h2v2zm0-4h-2V9h2v4z"></path></svg>Emergency</span>
+<span style="display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 10px; border-radius: 999px; background: #FDEEDC; color: #8F3E06; font-size: 13px; font-weight: 600"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 11 6-6 6 6"></path><path d="m6 19 6-6 6 6"></path></svg>High</span>
+<span style="display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 10px; border-radius: 999px; background: #FBF1D3; color: #6E5100; font-size: 13px; font-weight: 600"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 15 6-6 6 6"></path></svg>Medium</span>
+<span style="display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 10px; border-radius: 999px; background: #EEF0F3; color: #475467; font-size: 13px; font-weight: 600"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M6 12h12"></path></svg>Low</span>
+</div>
+<p style="margin: 0; font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: #4E5A55">Stage chips</p>
+<div style="display: flex; flex-wrap: wrap; gap: 8px">
+<span style="display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 10px; border-radius: 6px; border: 1px solid #DADAD2; color: #16201C; font-size: 13px; font-weight: 500"><span style="width: 8px; height: 8px; border-radius: 999px; border: 1.5px solid #4E5A55; box-sizing: border-box"></span>Logged</span>
+<span style="display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 10px; border-radius: 6px; border: 1px solid #DADAD2; color: #16201C; font-size: 13px; font-weight: 500"><span style="width: 8px; height: 8px; border-radius: 999px; background: #8FA8E8"></span>Booked</span>
+<span style="display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 10px; border-radius: 6px; border: 1px solid #DADAD2; color: #16201C; font-size: 13px; font-weight: 500"><span style="width: 8px; height: 8px; border-radius: 999px; background: #1F4FBF"></span>In progress</span>
+<span style="display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 10px; border-radius: 6px; border: 1px solid #DADAD2; color: #16201C; font-size: 13px; font-weight: 500"><span style="width: 8px; height: 8px; border-radius: 999px; background: {{primary}}"></span>Resolved</span>
+</div>
+<p style="margin: 0; font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: #4E5A55">Due time</p>
+<div style="display: flex; flex-wrap: wrap; gap: 8px">
+<span style="display: inline-flex; align-items: center; height: 24px; padding: 0 8px; border-radius: 4px; background: #B42318; color: #FFFFFF; font-size: 12px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase">Overdue 3 h</span>
+<span style="display: inline-flex; align-items: center; height: 24px; padding: 0 8px; border-radius: 4px; border: 1px solid #C4570A; color: #8F3E06; font-size: 12px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase">Due in 4 h</span>
+<span style="display: inline-flex; align-items: center; height: 24px; padding: 0 8px; border-radius: 4px; color: #4E5A55; font-family: 'IBM Plex Mono', monospace; font-size: 12px">Due 02.12</span>
+</div>
+<p style="margin: 0; font-size: 13px; line-height: 19px; color: #4E5A55">Defaults: 24 h for emergency/high, 28 days for medium/low (architecture §5.8).</p>
+</section>
+
+<section style="background: #FFFFFF; border: 1px solid #DADAD2; border-radius: 12px; padding: 24px; display: flex; flex-direction: column; gap: 16px">
+<p style="margin: 0; font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: #4E5A55">Inputs</p>
+<div style="display: flex; flex-direction: column; gap: 6px">
+<label for="c-desc" style="font-size: 14px; font-weight: 600">Anything to add? <span style="font-weight: 400; color: #4E5A55">Optional</span></label>
+<textarea id="c-desc" rows="3" placeholder="e.g. It started this morning" style="box-sizing: border-box; width: 100%; padding: 12px; border: 1px solid #DADAD2; border-radius: 6px; font-family: inherit; font-size: 16px; resize: none; background: #FFFFFF; color: #16201C"></textarea>
+</div>
+<div style="display: flex; flex-direction: column; gap: 6px">
+<label for="c-email" style="font-size: 14px; font-weight: 600">Email</label>
+<input id="c-email" type="email" value="mara@example.com" style="box-sizing: border-box; height: 44px; padding: 0 12px; border: 2px solid {{primary}}; border-radius: 6px; font-family: inherit; font-size: 16px; color: #16201C">
+<p style="margin: 0; font-size: 13px; color: #4E5A55">Focus: 2 px primary ring.</p>
+</div>
+<p style="margin: 0; font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: #4E5A55">Availability slots · 2 h windows</p>
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px">
+<button type="button" aria-pressed="true" style="height: 44px; border: 2px solid {{primary}}; border-radius: 8px; background: #DCEFE9; color: #0A4A3D; font-size: 14px; font-weight: 600">Thu 8–10</button>
+<button type="button" aria-pressed="false" style="height: 44px; border: 1px solid #DADAD2; border-radius: 8px; background: #FFFFFF; color: #16201C; font-size: 14px; font-weight: 500">Thu 10–12</button>
+<button type="button" aria-pressed="true" style="height: 44px; border: 2px solid {{primary}}; border-radius: 8px; background: #DCEFE9; color: #0A4A3D; font-size: 14px; font-weight: 600">Thu 16–18</button>
+<button type="button" aria-pressed="false" style="height: 44px; border: 1px dashed #C4570A; border-radius: 8px; background: #FFFFFF; color: #16201C; font-size: 14px; font-weight: 500">Fri 8–10</button>
+<button type="button" aria-pressed="false" style="height: 44px; border: 1px solid #DADAD2; border-radius: 8px; background: #FFFFFF; color: #16201C; font-size: 14px; font-weight: 500">Fri 10–12</button>
+<button type="button" disabled style="height: 44px; border: 0; border-radius: 8px; background: #EDEDE6; color: #4E5A55; font-size: 14px; font-weight: 500">Fri 12–14</button>
+</div>
+<p style="margin: 0; font-size: 13px; line-height: 19px; color: #4E5A55">Selected: filled tint + ring. Dashed orange: before the due time.</p>
+</section>
+
+<section style="background: #FFFFFF; border: 1px solid #DADAD2; border-radius: 12px; padding: 24px; display: flex; flex-direction: column; gap: 16px">
+<p style="margin: 0; font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: #4E5A55">Progress tracker · 4 stages</p>
+<ol style="list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px">
+<li style="display: flex; flex-direction: column; gap: 8px"><div style="height: 6px; border-radius: 999px; background: {{primary}}"></div><span style="font-size: 12px; font-weight: 600">Logged</span></li>
+<li style="display: flex; flex-direction: column; gap: 8px"><div style="height: 6px; border-radius: 999px; background: {{primary}}"></div><span style="font-size: 12px; font-weight: 600">Booked</span></li>
+<li style="display: flex; flex-direction: column; gap: 8px"><div style="height: 6px; border-radius: 999px; background: #DADAD2"></div><span style="font-size: 12px; color: #4E5A55">In progress</span></li>
+<li style="display: flex; flex-direction: column; gap: 8px"><div style="height: 6px; border-radius: 999px; background: #DADAD2"></div><span style="font-size: 12px; color: #4E5A55">Resolved</span></li>
+</ol>
+<p style="margin: 0; font-size: 13px; line-height: 19px; color: #4E5A55">Segmented bar, labels always visible. Current stage is bold. Dashboard maps it to 25/50/75/100 %.</p>
+<p style="margin: 0; font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: #4E5A55">Acknowledgement toast</p>
+<div role="status" style="display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-radius: 12px; background: #16201C; color: #FFFFFF; box-shadow: 0 8px 28px rgba(22,32,28,0.16)">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#7FD1B9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>
+<div style="display: flex; flex-direction: column; gap: 2px"><span style="font-size: 15px; font-weight: 600">Received, we’re on it</span><span style="font-size: 13px; color: #C9D1CD">Ticket logged · sorting it now</span></div>
+</div>
+</section>
+
+<section style="background: #FFFFFF; border: 1px solid #DADAD2; border-radius: 12px; padding: 24px; display: flex; flex-direction: column; gap: 16px">
+<p style="margin: 0; font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: #4E5A55">Landlord broadcast · pinned</p>
+<div style="display: flex; gap: 12px; padding: 14px 16px; border-radius: 12px; background: #DCEFE9; color: #0A3B31">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink: 0; margin-top: 2px"><path d="m3 11 18-5v12L3 14v-3z"></path><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"></path></svg>
+<div style="display: flex; flex-direction: column; gap: 4px"><span style="font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase">From your landlord · today</span><span style="font-size: 15px; line-height: 22px">Heating technician coming Thursday. Please make sure radiators are reachable.</span></div>
+</div>
+<p style="margin: 0; font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: #4E5A55">Building-wide status bar</p>
+<div style="display: flex; flex-direction: column; gap: 10px; padding: 14px 16px; border-radius: 12px; border: 1px solid #DADAD2; background: #FFFFFF">
+<div style="display: flex; justify-content: space-between; align-items: center; gap: 8px"><span style="display: flex; align-items: center; gap: 8px; font-size: 15px; font-weight: 600"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#C4570A" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.4-.5-2-1-3-1.1-2.1-.2-4 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.2.4-2.3 1-3.2.4 1.3 1.4 2.7 3.5 2.7z"></path></svg>Boiler · whole building</span><span style="font-size: 13px; color: #4E5A55">6 flats</span></div>
+<div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px"><div style="height: 4px; border-radius: 999px; background: {{primary}}"></div><div style="height: 4px; border-radius: 999px; background: {{primary}}"></div><div style="height: 4px; border-radius: 999px; background: #DADAD2"></div><div style="height: 4px; border-radius: 999px; background: #DADAD2"></div></div>
+<span style="font-size: 13px; color: #4E5A55">Technician booked · Thu 12.11, 08:00–10:00. No need to report it.</span>
+</div>
+</section>
+
+<section style="background: #FFFFFF; border: 1px solid #DADAD2; border-radius: 12px; padding: 24px; display: flex; flex-direction: column; gap: 16px">
+<p style="margin: 0; font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: #4E5A55">Sensor confirmation card</p>
+<div style="display: flex; flex-direction: column; gap: 14px; padding: 16px; border-radius: 16px; background: #FFFFFF; box-shadow: 0 1px 2px rgba(22,32,28,0.06), 0 4px 12px rgba(22,32,28,0.08); border: 1px solid #DADAD2">
+<div style="display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: #4E5A55"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" aria-hidden="true"><path d="M14 14.8V4a2 2 0 0 0-4 0v10.8a4 4 0 1 0 4 0z"></path></svg>Your building noticed something</div>
+<div style="display: flex; flex-direction: column; gap: 4px"><span style="font-size: 18px; line-height: 24px; font-weight: 600">Is your living room cold?</span><span style="font-size: 14px; line-height: 20px; color: #4E5A55">It has been 15 °C for 6 hours with the radiator on.</span></div>
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px">
+<button type="button" style="height: 44px; border: 0; border-radius: 8px; background: {{primary}}; color: #FFFFFF; font-size: 15px; font-weight: 600">Yes</button>
+<button type="button" style="height: 44px; border: 1px solid #DADAD2; border-radius: 8px; background: #FFFFFF; color: #16201C; font-size: 15px; font-weight: 600">No</button>
+<button type="button" style="height: 44px; border: 1px solid #DADAD2; border-radius: 8px; background: #FFFFFF; color: #16201C; font-size: 15px; font-weight: 600">Add photo</button>
+</div>
+</div>
+<p style="margin: 0; font-size: 13px; line-height: 19px; color: #4E5A55">Friendly, never alarming, except leaks: those use an emergency badge and stay pinned until answered.</p>
+</section>
+
+<section style="background: #FFFFFF; border: 1px solid #DADAD2; border-radius: 12px; padding: 24px; display: flex; flex-direction: column; gap: 16px">
+<p style="margin: 0; font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: #4E5A55">Tenant ticket card</p>
+<a href="#" style="display: flex; flex-direction: column; gap: 12px; padding: 16px; border-radius: 12px; border: 1px solid #DADAD2; background: #FFFFFF; color: #16201C; text-decoration: none">
+<div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 12px">
+<div style="display: flex; gap: 12px; align-items: center"><span style="width: 40px; height: 40px; border-radius: 10px; background: #E3EEFB; color: #1F4FBF; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z"></path></svg></span><div style="display: flex; flex-direction: column; gap: 2px"><span style="font-size: 16px; font-weight: 600">Leak under kitchen sink</span><span style="font-size: 13px; color: #4E5A55">Plumber · Thu 12.11, 08:00</span></div></div>
+<span style="display: inline-flex; align-items: center; gap: 4px; height: 24px; padding: 0 8px; border-radius: 999px; background: #FDEEDC; color: #8F3E06; font-size: 12px; font-weight: 600">High</span>
+</div>
+<div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px"><div style="height: 4px; border-radius: 999px; background: {{primary}}"></div><div style="height: 4px; border-radius: 999px; background: {{primary}}"></div><div style="height: 4px; border-radius: 999px; background: #DADAD2"></div><div style="height: 4px; border-radius: 999px; background: #DADAD2"></div></div>
+<span style="font-size: 13px; font-weight: 600">Technician appointment booked</span>
+</a>
+</section>
+
+<section style="background: #FFFFFF; border: 1px solid #DADAD2; border-radius: 12px; padding: 24px; display: flex; flex-direction: column; gap: 12px">
+<p style="margin: 0; font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: #4E5A55">Messages · who is speaking</p>
+<div style="display: flex; flex-direction: column; gap: 4px; align-self: flex-end; max-width: 80%"><div style="padding: 10px 14px; border-radius: 16px 16px 4px 16px; background: {{primary}}; color: #FFFFFF; font-size: 15px; line-height: 21px">Why is my room cold?</div><span style="align-self: flex-end; font-size: 12px; color: #4E5A55">You</span></div>
+<div style="display: flex; flex-direction: column; gap: 4px; max-width: 85%"><div style="padding: 10px 14px; border-radius: 16px 16px 16px 4px; background: #EDEDE6; font-size: 15px; line-height: 21px">Try bleeding the radiator: turn the valve at the top a quarter turn until water appears.</div><span style="font-size: 12px; color: #4E5A55">Assistant · automated</span></div>
+<div style="display: flex; flex-direction: column; gap: 4px; max-width: 85%"><div style="padding: 10px 14px; border-radius: 16px 16px 16px 4px; background: #FFFFFF; border: 1px solid #DADAD2; font-size: 15px; line-height: 21px">Running about 15 minutes late, sorry!</div><span style="font-size: 12px; color: #4E5A55">Technician · Jonas, plumber</span></div>
+<p style="margin: 0; font-size: 13px; line-height: 19px; color: #4E5A55">The AI is always labelled as automated. People get a name and role.</p>
+</section>
+
+<section style="background: #FFFFFF; border: 1px solid #DADAD2; border-radius: 12px; padding: 24px; display: flex; flex-direction: column; gap: 16px">
+<p style="margin: 0; font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: #4E5A55">Appointment reminder</p>
+<div style="display: flex; flex-direction: column; gap: 12px; padding: 16px; border-radius: 12px; border: 1px solid #DADAD2">
+<div style="display: flex; flex-direction: column; gap: 2px"><span style="font-size: 16px; font-weight: 600">Plumber tomorrow, 08:00–10:00</span><span style="font-size: 14px; color: #4E5A55">Leak under kitchen sink · Flat 4B</span></div>
+<div style="display: flex; flex-direction: column; gap: 8px">
+<button type="button" style="height: 44px; border: 0; border-radius: 8px; background: {{primary}}; color: #FFFFFF; font-size: 15px; font-weight: 600">I’ll be home</button>
+<button type="button" style="height: 44px; border: 1px solid #DADAD2; border-radius: 8px; background: #FFFFFF; color: #16201C; font-size: 15px; font-weight: 600">Someone else will let them in</button>
+<button type="button" style="height: 44px; border: 0; border-radius: 8px; background: transparent; color: #16201C; font-size: 15px; font-weight: 600; text-decoration: underline">Reschedule</button>
+</div>
+</div>
+</section>
+
+<section style="grid-column: span 2; background: #FFFFFF; border: 1px solid #DADAD2; border-radius: 12px; padding: 24px; display: flex; flex-direction: column; gap: 16px">
+<p style="margin: 0; font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: #4E5A55">Dashboard · KPI tiles and problem row</p>
+<div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px">
+<div style="padding: 16px; border-radius: 12px; border: 1px solid #DADAD2; display: flex; flex-direction: column; gap: 6px"><span style="font-size: 13px; color: #4E5A55">Time from issue to fix</span><span style="font-size: 28px; line-height: 32px; font-weight: 700">[X.X] d</span><span style="font-size: 12px; color: #4E5A55">Main KPI · median, 30 days</span></div>
+<div style="padding: 16px; border-radius: 12px; border: 1px solid #DADAD2; display: flex; flex-direction: column; gap: 6px"><span style="font-size: 13px; color: #4E5A55">Open / resolved</span><span style="font-size: 28px; line-height: 32px; font-weight: 700">[N] / [N]</span><span style="font-size: 12px; color: #4E5A55">This building</span></div>
+<div style="padding: 16px; border-radius: 12px; border: 1px solid #F3B8B1; background: #FFF7F6; display: flex; flex-direction: column; gap: 6px"><span style="font-size: 13px; color: #9A1C12; font-weight: 600">Overdue</span><span style="font-size: 28px; line-height: 32px; font-weight: 700; color: #9A1C12">[N]</span><span style="font-size: 12px; color: #9A1C12">Past target time</span></div>
+<div style="padding: 16px; border-radius: 12px; border: 1px solid #DADAD2; display: flex; flex-direction: column; gap: 6px"><span style="font-size: 13px; color: #4E5A55">Handled without you</span><span style="font-size: 28px; line-height: 32px; font-weight: 700">[NN] %</span><span style="font-size: 12px; color: #4E5A55">No landlord action needed</span></div>
+</div>
+<div style="display: grid; grid-template-columns: 120px minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1fr) 120px; align-items: center; gap: 16px; padding: 14px 16px; border-radius: 10px; border: 1px solid #DADAD2">
+<span style="display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 10px; border-radius: 999px; background: #FDE8E6; color: #9A1C12; font-size: 13px; font-weight: 600; justify-self: start"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2 1 21h22L12 2zm1 15h-2v-2h2v2zm0-4h-2V9h2v4z"></path></svg>Emergency</span>
+<div style="display: flex; flex-direction: column; gap: 2px"><span style="font-size: 15px; font-weight: 600">Water leak · ceiling</span><span style="font-size: 13px; color: #4E5A55">Flat 1B · linked to Flat 2B report</span></div>
+<span style="display: inline-flex; align-items: center; gap: 6px; font-size: 14px"><span style="width: 8px; height: 8px; border-radius: 999px; background: #8FA8E8"></span>Booked</span>
+<span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px">Today 14:00</span>
+<span style="display: inline-flex; align-items: center; justify-content: center; height: 24px; padding: 0 8px; border-radius: 4px; border: 1px solid #C4570A; color: #8F3E06; font-size: 12px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase">Due in 4 h</span>
+</div>
+</section>
+
+<section style="background: #FFFFFF; border: 1px solid #DADAD2; border-radius: 12px; padding: 24px; display: flex; flex-direction: column; gap: 16px">
+<p style="margin: 0; font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: #4E5A55">Tenant bottom navigation</p>
+<nav aria-label="Main" style="display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); border-top: 1px solid #DADAD2; padding-top: 8px">
+<a href="#" aria-current="page" style="display: flex; flex-direction: column; align-items: center; gap: 4px; min-height: 52px; justify-content: center; color: {{primary}}; text-decoration: none; font-size: 11px; font-weight: 700"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"></path></svg>Home</a>
+<a href="#" style="display: flex; flex-direction: column; align-items: center; gap: 4px; min-height: 52px; justify-content: center; color: #4E5A55; text-decoration: none; font-size: 11px; font-weight: 500"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 8v8M8 12h8"></path></svg>Add</a>
+<a href="#" style="display: flex; flex-direction: column; align-items: center; gap: 4px; min-height: 52px; justify-content: center; color: #4E5A55; text-decoration: none; font-size: 11px; font-weight: 500"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>History</a>
+<a href="#" style="display: flex; flex-direction: column; align-items: center; gap: 4px; min-height: 52px; justify-content: center; color: #4E5A55; text-decoration: none; font-size: 11px; font-weight: 500"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="8" r="4"></circle><path d="M4 21a8 8 0 0 1 16 0"></path></svg>Profile</a>
+<a href="#" style="display: flex; flex-direction: column; align-items: center; gap: 4px; min-height: 52px; justify-content: center; color: #4E5A55; text-decoration: none; font-size: 11px; font-weight: 500"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>Messages</a>
+</nav>
+<p style="margin: 0; font-size: 13px; line-height: 19px; color: #4E5A55">Order follows product.md §8. Active tab: primary colour plus bold label.</p>
+</section>
+
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"primary":{"editor":"color","default":"#0E5E4E","options":["#0E5E4E","#1F4FBF","#5B3FA6","#16201C"]},"$preview":{"width":1440,"height":2000}}'>
+class Component extends DCLogic {
+renderVals() {
+return { primary: this.props.primary ?? '#0E5E4E' };
+}
+}
+</script>
+</body>
+</html>
