@@ -118,6 +118,9 @@ Issue
 - Notifications to affected roommates and neighbours
 - Landlord broadcast messages to a building
 - Landlord dashboard: portfolio list, per-building problem view, KPIs, ticket detail
+- Due times per urgency (target time for each ticket, overdue tickets flagged on the dashboard)
+- Appointment reminders with tenant replies ("I'll be home" / "Someone else will let them in" / "Reschedule")
+- Visit outcomes (completed / needs follow-up / no access), with automatic re-booking
 
 ### Issue types in the MVP
 
@@ -133,7 +136,7 @@ Issue
 
 - Real sensor hardware and integrations (simulated only)
 - Shared-space issues such as rubbish in common areas (raised, parked)
-- A technician-side app (technicians set availability in the pool and receive bookings, nothing more)
+- A technician-side app or technician accounts. Technicians get booking emails with a private link to one page where they set their availability and update the job (confirmed / running late / on site / done)
 - Payments and invoicing
 - Rent and contracts
 - Cross-building ML prediction (vision, not MVP)

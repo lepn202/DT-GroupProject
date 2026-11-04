@@ -1,335 +1,475 @@
 # Architecture & Tech Stack
 
-> **Scope:** this is a **basic prototype** for a group project, not a production system.
-> It follows the flow diagram below. We keep the moving parts to a minimum and use
-> simulated sensors, so the whole flow can be demoed on a laptop.
+> **Scope:** this is a **basic prototype (MVP)** for a group project, not a production system.
+> What we build and why is defined in [`product.md`](product.md). This file describes **how** it is built.
+> The research behind it is in [`evidence.md`](evidence.md) (Issues 1–12).
 
-## 1. Idea in one paragraph
+## 1. MVP in one paragraph
 
-Today, rental housing maintenance only happens after something goes wrong. Tenants email, wait, and never know when someone will come. Landlords get unstructured reports and only notice damage once it is expensive to fix. We give each flat a "nervous system" of IoT sensors (simulated in the prototype) and add an AI layer that **detects** problems early, **asks the tenant to confirm**, **turns** a photo, video or voice report into a structured ticket, **groups** related issues across flats, and **acts**: it prioritises the ticket, books the right trade, and keeps everyone informed.
+The product is one web app with two faces. Tenants get a **mobile-first app** to report problems with a photo, video, voice memo or text, and to confirm simulated sensor alerts. Landlords get a **problem-first dashboard** across their portfolio. An AI classifier turns every report into a ticket and then does one of four things: sends a **quick fix** through the chatbot, **books a technician** from a shared pool against the tenant's availability, **logs it** for the landlord, or **dismisses** it. Technicians have no app. They get an email with a private link to a single page. Sensors are **simulated** from a demo panel.
 
-The research behind this is in [`evidence.md`](evidence.md) (Issues 1–12). What the evidence asks of the design:
+**MVP focus** (from `product.md` §6): simulated sensors, the tenant self-reporting flow end to end, and the landlord dashboard.
+
+### What the evidence asks of the design
 
 | Evidence | Design decision | Where |
 |---|---|---|
-| Damp/mould is the #1 defect; leaks the #3 (Issue 1). Plumbing and HVAC are the biggest request categories (Issue 8) | Humidity, temperature, valve and leak sensors; a mould-risk rule | §5.1, §5.2 |
-| Tenants hesitate to complain (Issue 6) | The system asks first ("Is it cold?"); reporting by photo, video or voice, no forms | §5.3 |
-| No acknowledgement, constant chasing (Issue 3) | An instant reply with urgency and next step; a live status timeline; "status?" questions are logged | §5.3 |
-| The same communal fault is reported many times (Issue 5) | Sensor anomalies **and** tenant reports join one incident; every affected flat is told | §5.2, §5.5 |
-| Up to 20% of appointments missed, mostly because the tenant didn't know (Issue 4) | Confirmed slots, reminders, "I'll be home" confirmation, visit outcome recorded | §5.7 |
-| Most delay is coordination, not repair (Issues 9, 10) | In-app booking with optional auto-approve | §5.7 |
-| Landlords are judged on target times (Issue 12) | Every ticket gets a due time from its urgency; the dashboard shows what is at risk | §5.8 |
+| Damp/mould, heating and leaks are the most common defects (Issues 1, 8) | Sensor presets and MVP issue types: water, heating, mould, electricity, small defects | §5.1, §5.4 |
+| Tenants hesitate to complain (Issue 6) | The system asks first ("Is your room cold?"); one-tap photo, video or voice reporting, no forms | §5.2, §5.3 |
+| No acknowledgement, constant chasing (Issue 3) | "Received, we're on it" on upload; four-stage progress on every ticket; status questions answered by the chatbot | §5.3, §5.6 |
+| The same communal fault is reported many times (Issue 5) | Related reports join one ticket; building-wide tickets show as a status bar on every tenant's Home | §5.5 |
+| Most missed appointments happen because the tenant didn't know (Issue 4) | Tenant picks their own slots, gets reminders and confirms "I'll be home" | §5.7 |
+| Most delay is coordination, not repair (Issues 9, 10) | Automatic matching and booking by default; landlord only monitors | §5.7 |
+| Landlords are judged on target times (Issue 12) | Every ticket gets a due time from its urgency; the dashboard shows overdue tickets | §5.8 |
 
-## 2. Flow (scope)
+## 2. Flow
 
 ```mermaid
 flowchart LR
     Issue([Issue])
 
-    subgraph Detect["Two ways in"]
-        SR["System reports<br/><i>sensor anomaly</i>"]
+    subgraph In["Two inputs"]
+        SR["System report<br/><i>simulated sensor event</i>"]
         TC["Tenant confirms<br/><i>yes / no / add photo</i>"]
-        TR["Tenant reports<br/><i>proactively</i>"]
-        AD["Add details<br/><i>photo, video, voice, note</i>"]
+        TR["Tenant report"]
+        AD["Photo, video,<br/>voice memo, text"]
     end
 
-    AI["AI classifier<br/><i>urgency, next steps</i>"]
-    SCH["Scheduling<br/><i>tell roommates</i>"]
-    MNT["Maintenance<br/><i>right trade</i>"]
-    DB["Dashboard<br/><i>landlord, maintenance</i>"]
+    AI["AI classifier<br/><i>issue, urgency, next step</i>"]
+    QF["Chatbot quick fix"]
+    SCH["Scheduling<br/><i>tenant slots × technician pool</i><br/><i>inform roommates / neighbours</i>"]
+    MNT["Contact technician<br/><i>email + link page</i>"]
+    DB["Landlord dashboard"]
 
     Issue --> SR --> TC --> AI
     Issue --> TR --> AD --> AI
-    AI -- "info" --> DB
+    AI --> QF -. "back to tenant" .-> TR
     AI --> SCH --> MNT --> DB
-    AI -. "chatbot quick fix" .-> TR
+    AI -- "every ticket" --> DB
+    SCH -- "status" --> DB
 ```
 
-| Diagram box | Where it lives in the system | Section |
+| `product.md` workflow step | Built as | Section |
 |---|---|---|
-| System reports | Sensor simulator + anomaly rules | §5.1, §5.2 |
-| Tenant confirms | Confirmation prompt in the tenant app (yes / no / photo) | §5.3 |
-| Tenant reports / Add details | Tenant web app capture flow (photo, video, voice, note) | §5.3, §5.4 |
-| AI classifier | Jev for classification, Claude for text tasks | §5.5 |
-| Chatbot quick fix | Chat in the tenant app | §5.6 |
-| Scheduling | In-app booking + roommate notifications | §5.7 |
-| Maintenance | Technician view, matched by trade | §5.7 |
-| Dashboard | Landlord / maintenance dashboard (live updates) | §5.8 |
+| 1a. System report | Demo panel inserts a `sensor_event` | §5.1 |
+| 1b. Tenant confirms | Push + in-app prompt: Yes / No / Add photo | §5.2 |
+| 2a. Tenant report | Add-ticket screen (photo, video, voice memo, text) | §5.3 |
+| 3. AI classifier | Jev + Claude, with safety rules | §5.4 |
+| 4a. Quick fix | Claude chatbot in Messages | §5.6 |
+| 4b. Scheduling | Tenant availability matched to the technician pool by code | §5.7 |
+| 5. Contact maintenance | Booking email with a private technician link page | §5.7 |
+| 6. Dashboard | Portfolio → building → ticket detail | §5.8 |
+| 7. Resolution | Technician taps "done", the ticket closes and moves to the tenant's History | §5.7 |
 
 ## 3. Stack at a glance
 
-The project uses **one language (TypeScript)** and **one managed backend (Supabase)**, so the team spends time on the idea rather than on infrastructure.
+One language (**TypeScript**), one app (**Next.js**) and one managed backend (**Supabase**). There are no separate servers to run.
 
 | Layer | Choice | Why |
 |---|---|---|
-| Language | **TypeScript** (Node 22 LTS) | One language for the web app, worker and AI code |
-| Repo | **pnpm workspaces** | Web app and worker share types and the database client |
-| Web app (tenant + landlord + technician) | **Next.js (App Router)**, mobile-friendly, installable as a PWA | One codebase with role-based views. Phone camera works in the browser |
-| UI | **Tailwind CSS + shadcn/ui**, **Recharts** for sensor charts | Fast to build |
-| Database | **Supabase Postgres** | Tickets, users and sensor readings in one place |
-| Auth & access | **Supabase Auth** + Row-Level Security | Tenants only see their own flat |
-| Media storage | **Supabase Storage** (private bucket) | Photos and videos |
-| Live updates | **Supabase Realtime** | Dashboard and ticket status update without refresh |
-| Background jobs | **Supabase Cron (pg_cron)** + a small **Node worker** | Periodic anomaly checks, AI calls |
-| Sensors | **Sensor simulator** publishing over **MQTT** (local Mosquitto) | Realistic data and injectable faults, no hardware needed |
-| Classification | **TypeSafe Jev** (`@typesafe-ai/sdk`) | Typed answers + confidence for category, urgency and trade, at a fraction of LLM cost |
-| Text AI | **Claude API** (`@anthropic-ai/sdk`), model `claude-opus-5-5` | Chatbot, ticket summaries, scheduling agent, fallback when Jev is unsure |
-| Video handling | **ffmpeg** in the worker | Pulls a few still frames from a tenant video |
-| Notifications | **In-app** (Realtime + browser push) and **email** (Resend) | Tenant confirmations, roommate notices, technician jobs |
-| Hosting | **Vercel** (web), **Supabase Cloud** (data), worker runs locally or on a free container tier | Free tiers are enough |
+| Language | **TypeScript** | One language for the UI, server code and AI code |
+| App | **Next.js (App Router)** on **Vercel** | Tenant app, landlord dashboard, technician pages and API routes in one codebase. Server Actions and Route Handlers hold all backend logic |
+| Tenant app | The same Next.js app, mobile-first and **installable as a PWA** | Phone camera, microphone and push notifications in the browser, no app store |
+| UI | **Tailwind CSS + shadcn/ui**, **Recharts** for KPI charts | Fast to build |
+| Database | **Supabase Postgres** | All data in one place |
+| Auth & access | **Supabase Auth** (email + password) + Row-Level Security | Landlords and tenants log in. Technicians don't have accounts (§5.7) |
+| Media | **Supabase Storage** (private bucket, signed URLs) | Photos, videos, video frames |
+| Live updates | **Supabase Realtime** | Ticket progress, dashboard and home-screen status bars update without refresh |
+| Scheduled jobs | **Supabase Cron** calling one API route every 15 min | Appointment reminders |
+| Classification | **TypeSafe Jev** (`@typesafe-ai/sdk`) | Typed answers + confidence for the classifier's fixed-choice fields, much cheaper than an LLM |
+| Text AI | **Claude API** (`@anthropic-ai/sdk`), model `claude-opus-5-5` | Ticket summaries, quick-fix text, chatbot, fallback classification |
+| Voice memos | Browser **Web Speech API** | Transcribed live on the phone. No speech-to-text service |
+| Video | Browser `<video>` + `<canvas>` | ~4 still frames are extracted on the phone before upload. No ffmpeg |
+| Notifications | **In-app** (Realtime), **Web Push** for tenants, **email** via Resend | Sensor confirmations, booking notices, broadcasts, technician bookings, reminders |
+| Hosting | **Vercel** + **Supabase Cloud** free tiers | Enough for the prototype |
 
 ## 4. System architecture
 
 ```mermaid
 flowchart TB
-    SIM["Sensor simulator<br/>temp · humidity · leak · TRV · window"]
-    SIM -- MQTT --> BROKER[(Mosquitto)]
-
-    subgraph Backend
-        WK["Worker<br/>ingestion · anomaly rules · AI jobs · ffmpeg"]
-        PG[("Supabase Postgres")]
-        ST[("Supabase Storage")]
+    subgraph Browser
+        TEN["Tenant app (PWA)<br/>Home · Add ticket · History · Profile · Messages"]
+        LL["Landlord dashboard<br/>Portfolio · Building · Ticket · Settings"]
+        TECH["Technician link page<br/>/t/[token]"]
+        DEMO["Demo panel<br/>fire sensor events"]
     end
 
-    BROKER --> WK --> PG
-    PG -- "pg_cron every 5 min" --> WK
-    WK <--> JEV(("Jev<br/>classification"))
-    WK <--> CLAUDE(("Claude<br/>chat · summaries · scheduling"))
-
-    subgraph App["Next.js app"]
-        TEN[Tenant]
-        LL[Landlord dashboard]
-        TECH[Technician]
+    subgraph Next["Next.js on Vercel"]
+        API["Server Actions + Route Handlers<br/>reports · sensor events · classifier · matching · messages"]
+        CRON["/api/cron/reminders"]
     end
 
-    TEN -- "photo / video / note" --> ST
-    TEN -- "report, confirmations, chat" --> PG
-    PG -- Realtime --> TEN & LL & TECH
+    subgraph Supabase
+        PG[("Postgres + RLS")]
+        ST[("Storage")]
+        RT["Realtime"]
+        SC["Cron (every 15 min)"]
+    end
+
+    TEN & LL & DEMO --> API
+    TECH --> API
+    TEN -- "photo / video frames" --> ST
+    API --> PG
+    API <--> JEV(("Jev"))
+    API <--> CLAUDE(("Claude"))
+    API -- "booking + reminder emails" --> MAIL(("Resend"))
+    API -- "Web Push" --> TEN
+    SC --> CRON --> PG
+    PG --> RT --> TEN & LL
 ```
 
-**Principle:** rules **detect**, AI **interprets and acts**, humans **validate**.
+**Principle:** the AI **classifies and drafts**, code **decides and books**, humans **confirm**.
 
 ## 5. Components
 
-### 5.1 Sensors (simulated)
+### 5.1 Simulated sensors (demo panel)
 
-- `tools/sensor-sim` publishes readings for a few fake flats every few seconds. Topics follow `building/{b}/unit/{u}/room/{r}/{type}`.
-- Each fault scenario can be triggered from a CLI flag or a small admin button: stuck radiator valve, leak, humidity creep, and a whole floor going cold (boiler failure).
-- The worker subscribes to the broker, validates each message with Zod, and inserts rows into `sensor_readings`.
+There is no hardware, MQTT or stream of readings. The demo panel (`/demo`, landlord accounts only, hidden in production) **inserts one `sensor_event` row per click**. Each row is already an anomaly, e.g. *Flat 4B, temperature 15 °C for 6 h, radiator on*.
 
-### 5.2 Anomaly rules ("System reports")
-
-A plain TypeScript rule set, run every 5 minutes. No AI is needed to *detect* problems:
-
-| Rule | Condition | Severity |
+| Preset | Event | Issue type |
 |---|---|---|
-| Leak | Leak sensor wet | critical |
-| Heating fault | Room < 17 °C for ≥ 3 h, valve open ≥ 80 %, window closed | high |
-| Mould risk | Humidity > 70 % for most of the last 72 h | medium |
-| Sensor offline | No reading for > 2× the reporting interval | low |
+| Cold room | Temperature 15 °C for 6 h, radiator valve open | heating |
+| Boiler failure | Fires "cold room" for every flat on one floor (e.g. 4A–4D) | heating, building-wide |
+| Leak | Leak detector wet | water |
+| No hot water | Hot-water pipe below 30 °C for 2 h | water |
+| Mould risk | Humidity > 70 % for 3 days | mould |
 
-**Grouping:** if several flats on the same floor raise the same anomaly within an hour, they are attached to **one incident**, which produces one ticket ("likely boiler or riser"). Tenant reports join incidents too (§5.5), so six "my flat is cold" reports and two sensor alerts become one ticket, not eight (evidence Issue 5).
+The panel lets you pick building, flat and preset, and shows the resulting tenant prompt and ticket live. That's all the demo script (`product.md` §14, steps 7–10) needs.
 
-**Building notice:** when an incident is open, every tenant in an affected flat sees it in their app ("Heating fault on floor 2, engineer booked Tue 10–12"), and the report form shows it first, with a "this affects me too" button instead of a new report.
+### 5.2 Tenant confirmation ("Tenant confirms")
 
-Each anomaly stores the evidence behind it (readings + rule name). The tenant prompt and the dashboard show this evidence.
+1. A new `sensor_event` sends the flat's tenants a **push notification** plus a card on Home: *"Is your living room cold? It has been 15 °C for 6 hours with the radiator on."* → **Yes / No / Add photo**.
+2. **No** → the event is marked `dismissed`. Nothing reaches the landlord. It shows in the tenant's History.
+3. **Yes / Add photo** → a `report` with `source = sensor` is created (plus the photo, if added) and goes to the classifier (§5.4).
+4. Leak prompts are marked urgent and stay pinned at the top of Home until answered.
 
-### 5.3 Tenant app ("Tenant confirms" / "Tenant reports")
+### 5.3 Tenant app
 
-- **Confirm** (sensor-initiated): *"Your living room has been at 15 °C for 6 h with the heating on. Is it cold?"* → **Yes / No / Add photo**. *No* closes the anomaly as a false alarm. If there is no answer, `high` and `critical` issues are escalated anyway.
-- **Report** (tenant-initiated): take a photo or a short video, and optionally add a note by typing or speaking. No forms. Target: under 60 seconds from opening the app.
-- **Instant acknowledgement:** within a minute of submitting, the tenant sees what the system understood (category, urgency) and the next step ("A plumber will be booked within 24 hours"), or the quick-fix chat (§5.6). Nothing waits on a person to say "received".
-- **Status timeline** per ticket (received → classified → booked → resolved), updated live, with the next step and its expected time always shown, so the answer to "what's happening?" is on screen before anyone asks (evidence Issue 3). A tenant who still asks, in the chat or with the "any update?" button, gets an answer from the ticket's data, and the question is logged as a `status_query` event.
+Mobile-first. Bottom navigation: **Home · Add ticket · History · Profile · Messages** (`product.md` §8).
 
-### 5.4 Media handling ("Add details")
+**Add ticket**: three big buttons and an optional text field. No form fields.
 
-| Input | Processing |
+| Input | What happens on the phone | What is stored |
+|---|---|---|
+| Photo | Resized to ≤ 1568 px on the long edge | Image in Storage |
+| Video (≤ 30 s) | ~4 still frames extracted with `<video>` + `<canvas>` | Video + frames in Storage. Only the frames go to the AI |
+| Voice memo | Transcribed live by the Web Speech API while recording | **Transcript only**, shown in ticket detail. The audio isn't kept |
+| Text | — | Text |
+
+The Web Speech API works in Chrome and Safari, but Chrome sends the audio to Google for recognition. Browsers without it (e.g. Firefox) show only the text field.
+
+**On upload:** the tenant immediately sees **"Received, we're on it"** and the ticket appears in Home and History (status `logged`). Classification runs right after the response (Next.js `after()`), and the result arrives over Realtime within seconds:
+- quick fix → a chatbot message with the fix (§5.6)
+- technician needed → the **availability picker** opens (§5.7)
+
+**Home:**
+- pinned **landlord broadcast** (latest one for the building)
+- **building-wide status bar** for any open ticket with `scope = building`, showing its stage
+- **my tickets** with a progress indicator
+- **quick add** button
+- open **sensor confirmation** cards
+
+**Progress indicator** (four stages, derived from ticket and appointment status):
+
+| Stage shown to tenant | Ticket status |
 |---|---|
-| Photo | Resize to ≤ 1568 px on the long edge |
-| Video (≤ 30 s) | ffmpeg extracts ~4 still frames, which are then treated as photos |
-| Voice note | Dictated in the browser (Web Speech API), turned into text before upload; the audio is not stored. Where the browser has no speech recognition, the field falls back to typing |
-| Text note | Used as is |
+| 1. Repair logged | `logged`, `confirmed`, `quick_fix` |
+| 2. Technician appointment booked | `booked` |
+| 3. Fix in progress | `in_progress` |
+| 4. Resolved | `resolved` |
 
-### 5.5 AI layer ("AI classifier")
+**History:** past tickets (status, date, media, outcome) plus confirmed and dismissed sensor alerts.
+**Profile:** personal details, password, linked building and apartment.
+**Messages:** landlord broadcasts and ticket messages, technician updates, and the chatbot.
 
-We split the work by what each model is good at:
+### 5.4 AI classifier
 
-- **Jev** (TypeSafe AI) makes the **bounded decisions**. It doesn't generate text. It answers declared questions with typed values plus a confidence score, which is much cheaper than calling an LLM for every report.
-- **Claude** handles the jobs that need **language or multi-step actions**: writing the ticket summary, the quick-fix chat, the scheduling agent, and a second opinion when Jev is unsure.
+Implements the spec in `product.md` §11. **Jev** answers the fixed-choice fields with a confidence score. **Claude** writes the free-text fields and steps in when Jev is unsure. Code fills in what is already known.
 
-**Questions Jev answers for every report or anomaly:**
-
-| Field | Type | Values |
+| Field | Values | Decided by |
 |---|---|---|
-| `category` | choice | heating, plumbing, leak, electrical, mould_damp, windows_doors, appliance, other |
-| `trade` | choice | plumber, heating_engineer, electrician, handyman, damp_specialist |
-| `urgency` | choice | critical, high, medium, low |
-| `self_fixable` | yes/no | Can the tenant safely fix it with a guide? |
-| `safety_risk` | yes/no | Gas, live electrics, major water ingress |
-| `needs_access` | yes/no | Does a technician need to enter the flat? (triggers roommate notice) |
-| `same_as_incident` | choice | Which of the building's open incidents this report is about, or `none`. The options are the open incidents' summaries, built by code; Jev only picks among them. Only asked when the building has an open incident |
+| `issue_type` | water · heating · mould · electricity · defect · other | Jev |
+| `location` | building, apartment, room (if given) | Building and apartment come from the tenant's account or the sensor event. Room is read from the text by Claude |
+| `scope` | apartment · building | Jev, overridden by building grouping (§5.5) |
+| `urgency` | emergency · high · medium · low | Jev, never below the safety floor (below) |
+| `next_step` | quick_fix · schedule_technician · inform_landlord · dismiss | Jev |
+| `trade` | plumber · heating · electrician · handyman · none | Jev |
+| `quick_fix_text` | Step-by-step guide | Claude, only if `next_step = quick_fix` |
+| `related_tickets` | Open tickets in the same building | Jev picks from a list of the building's open tickets built by code (or "none") |
+| `summary` | One sentence for the dashboard | Claude |
 
-**Routing logic:**
+**Input:** text (note or voice transcript), image frames, and context built by code: the flat's floor, the building's open tickets, and sensor event details. Jev reads images through its experimental image preview (see caveats).
+
+**Routing:**
 
 ```
-report / anomaly
+report (tenant or confirmed sensor event)
    │
    ▼
-Jev classify (text note + sensor evidence, photos if enabled)
+safety rules ── gas / smoke / sparks / leak sensor ──► urgency = emergency + on-screen safety advice
    │
-   ├─ every confidence ≥ 0.8 ──► create ticket ──► Claude writes 2-line summary
+   ▼
+Jev: issue_type, scope, urgency, next_step, trade, related_tickets
    │
-   └─ any confidence < 0.8 ───► Claude classifies instead (same fields, structured output)
-                                 └─ still unsure ──► tenant gets a follow-up question
+   ├─ all confidences ≥ 0.8 ──► Claude (effort low): summary, room, quick_fix_text
+   └─ any confidence  < 0.8 ──► Claude (effort low) classifies all fields (structured output)
+                                 └─ still unsure ──► ticket goes to "needs triage" on the dashboard
 ```
 
-**Caveats about Jev to keep in mind:**
+**Safety floor:** a leak sensor, or words like "gas", "smoke", "sparks" or "burning", force `urgency = emergency`, whatever the AI says. Gas or smoke also shows an on-screen instruction to leave the flat and call 112, before anything else.
 
-- Jev is **new (early access since Sept 2026)**, and its **image input is an experimental preview** (Jev 1.14, enabled with an opt-in header) that TypeSafe says is less reliable than text. For the prototype we send photos to Jev with that feature on. If results look poor in testing, we send photo-only reports straight to Claude, which handles images natively.
-- The cost advantage comes from the vendor's own numbers. We'll log the cost of every call (`ai_calls` table) so we can compare it ourselves.
-- Check exact SDK calls and header names against TypeSafe's own docs before building, since most coverage so far is secondary.
+**What each `next_step` does:**
+
+| `next_step` | Result |
+|---|---|
+| `quick_fix` | Ticket status `quick_fix`. The chatbot sends `quick_fix_text` in Messages with "Fixed it" / "Didn't work". "Didn't work" switches to `schedule_technician` |
+| `schedule_technician` | The tenant's availability picker opens → matching and booking (§5.7) |
+| `inform_landlord` | Ticket stays `logged` and appears on the dashboard without a booking (e.g. cosmetic damage kept for the next planned visit) |
+| `dismiss` | Ticket status `dismissed`, with a short reason for the tenant. Visible in History |
+
+**Jev caveats:**
+- Jev has been in **early access since Sept 2026**, and its **image input is an experimental preview** (Jev 1.14, opt-in header) that TypeSafe says is less reliable than text. If photo-only reports classify poorly in testing, send them straight to Claude, which handles images natively.
+- The cost advantage is the vendor's own claim. Every call is logged in `ai_calls` with its cost, so we can check it ourselves.
+- Check the exact SDK calls and header names against TypeSafe's docs before building.
 
 **Claude settings:**
 
 | Setting | Value |
 |---|---|
 | Model | `claude-opus-5-5` |
-| Effort | `low` for summaries and fallback classification, `medium` for chatbot and scheduler (always set explicitly: this model's default is `medium` and thinking can't be turned off) |
-| Structured output | `client.messages.parse` + Zod schema, so tickets are never parsed from free text |
-| Tools | `tool_choice: "auto"` + `strict: true` (forced tool choice is not supported on this model) |
-| Refusals | Check `stop_reason === "refusal"` before reading content. If a call is refused or fails, the ticket goes to the landlord's "needs triage" column |
+| Effort | `low` for summaries, quick-fix text and fallback classification; `medium` for the chatbot. Always set it explicitly: the default is `medium`, and thinking can't be turned off on this model |
+| Structured output | `client.messages.parse` + a Zod schema shared with the database types |
+| Tools (chatbot) | `tool_choice: "auto"` + `strict: true` (forced tool choice isn't supported on this model) |
+| Refusals and errors | Check `stop_reason === "refusal"` before reading content. Any failed or refused call sends the ticket to "needs triage" |
 
-**Safety guardrail:** the rules always win. A leak sensor or keywords such as "gas" or "sparks" force `critical` + `safety_risk`, whatever the AI says.
+### 5.5 Grouping, building-wide tickets and neighbours
 
-### 5.6 Chatbot quick fix (dashed arrow)
+- **Tenant reports:** if Jev links a report to an open ticket (`related_tickets`), the report is **attached to that ticket** instead of creating a new one. The tenant sees the existing ticket's progress.
+- **Sensor events:** if **3 or more flats in the same building** have a heating event within 1 hour and at least one tenant has confirmed, code merges them into **one ticket with `scope = building`** (the "boiler ticket"). The flat tickets are attached to it, and one technician visit covers all of them.
+- **Building status bar:** every open ticket with `scope = building` appears on **every tenant's Home** in that building, with its stage.
+- **Neighbours below:** for a water ticket, the flat **one floor down in the same position** (e.g. 2B → 1B) gets a notification right away: *"Water leak reported in the flat above. Check your ceiling and tell us if you see water."* Units store `floor` and `position` for this.
 
-When `self_fixable = yes` and `safety_risk = no` (examples: bleeding a radiator, resetting a tripped switch, a TRV with flat batteries), the tenant gets a **guided chat with Claude** before any ticket is created.
+### 5.6 Chatbot (Messages)
 
-- The chat is grounded in a few how-to guides per flat (markdown files written by the landlord).
-- Claude has three tools: `create_ticket`, `request_photo` and `mark_resolved`. Every chat ends either **resolved** or **ticket created**.
-- For sensor issues, the system checks the readings after "fixed". If the room is still cold after 2 h, the issue reopens.
+A Claude chat in the Messages tab, at effort `medium`. It handles:
+- **Quick fixes:** step-by-step guides (bleeding a radiator, resetting a tripped switch, re-sealing a window), grounded in a small set of guides per building written by the landlord (markdown).
+- **"Why is my room cold?"** answered from the tenant's own sensor events and tickets.
+- **Status questions** answered from ticket and appointment data, so the tenant doesn't have to chase the landlord.
 
-### 5.7 Scheduling & maintenance ("Tell roommates" / "Right trade")
+**Tools:**
+- `get_my_tickets`: the tenant's tickets and appointments
+- `escalate_to_technician`: switches a quick fix to scheduling
+- `mark_fixed`: closes a quick-fix ticket
 
-Scheduling happens **entirely inside the app**. There is no external calendar.
+**Limits:** no gas, electrical or structural DIY. Every quick fix ends either **fixed** or **escalated**.
 
-- `technicians` have a trade and weekly availability slots that they manage in the app.
-- The **Claude scheduler** uses tools: `find_technicians(trade)` → `get_free_slots(...)` → `propose_appointment(...)`.
-- **Landlord approval setting** (per landlord, in the dashboard settings):
+### 5.7 Scheduling, technician pool and visits
 
-  | Setting | Behaviour |
-  |---|---|
-  | **Confirm manually** | The maintenance job and proposed appointment wait in the dashboard until the landlord approves (or changes the slot or technician) |
-  | **Auto-approve** | The system books the job and appointment immediately. The landlord is informed and can still cancel |
+**Technician pool:** one shared pool of technicians, seeded for the demo. Each has a trade, contact details and availability slots. Whether landlords bring their own technicians is still open (`product.md` §10).
 
-- Once booked, **all tenants of the flat** are notified (time window, room, whether access is needed), and the technician sees the job.
-- **Reminders** go out the evening before and an hour before the slot. The tenant answers "I'll be home", "Someone else will let them in" or "Reschedule"; a reschedule goes back to the scheduler instead of becoming a missed visit (evidence Issue 4: 80% of missed appointments are a tenant who didn't know or wasn't home).
-- **Visit outcome:** the technician closes each visit as `completed`, `needs_follow_up` (parts, second visit) or `no_access`. A `no_access` visit is rebooked at once and counts against the missed-appointment rate.
-- **Technician view:** job list with photos, ticket summary and sensor evidence, plus "on my way" / "done + photo" buttons.
+**Technicians have no accounts.** Each technician has a long random **link token**. Every email to them contains a link to `/t/[token]`, a single page where they can:
+- set or update their **availability** (weekly time slots)
+- see their **jobs** (media, location, summary, slot)
+- tap **Confirmed / Running late / On site / Done**. Each tap posts a message to the tenant's Messages and updates the ticket
 
-### 5.8 Dashboard (landlord & maintenance)
+**Matching and booking** (plain code, no AI):
 
-- **Overview:** flats colour-coded by open issues.
-- **Ticket board:** new → awaiting approval → scheduled → in progress → resolved, with a "needs triage" column for anything the AI couldn't classify.
-- **Incidents:** grouped issues, e.g. "4 flats, floor 2, heating".
-- **Sensor charts** per room.
-- **Due times:** every ticket gets `due_at` from its urgency, using the UK's median repair targets as the default: 24 hours for `critical`/`high`, 28 days for `medium`/`low` (evidence Issue 12). The board sorts by it and marks tickets close to or past it.
-- **Settings:** the approval mode from §5.7, and the target times.
-- **Headline metrics:** tickets resolved on time without the tenant chasing, tickets handled without manual coordination, and issues caught by sensors before any tenant reported them.
+1. The classifier picks `schedule_technician`, and the tenant marks when they're home (2-hour windows over the next 7 days; slots before the due time are highlighted).
+2. Code finds the **earliest overlap** between the tenant's windows and a free slot of a technician with the right `trade`.
+3. **Automatic mode** (default): the appointment is `booked` straight away. **Manual mode:** it's `proposed` and waits on the dashboard until the landlord confirms it or picks another slot or technician.
+4. On booking, the **technician gets an email** with the job and their link, **all tenants of the flat** (roommates) are told the slot, and the ticket moves to `booked`. For a building-wide ticket, every affected flat is told.
+5. If there's no overlap, the tenant is asked for more windows and the ticket is flagged on the dashboard.
 
-## 6. Data model (core tables)
+**Reminders** (Supabase Cron → `/api/cron/reminders`, every 15 min) go out the evening before and 1 hour before the slot, by push and email. The tenant answers **"I'll be home" / "Someone else will let them in" / "Reschedule"**. "Reschedule" reopens the availability picker and frees the slot. The technician is notified.
+
+**Visit outcomes:** "On site" sets the ticket to `in_progress`. "Done" asks for an outcome:
+
+| Outcome | Effect |
+|---|---|
+| `completed` | Ticket → `resolved` and moves to the tenant's History |
+| `needs_follow_up` | Parts or a second visit needed. The tenant gets the availability picker again for a new appointment |
+| `no_access` | Nobody let them in. Re-booked through the tenant's availability picker. Counts as a missed appointment on the dashboard |
+
+### 5.8 Landlord dashboard
+
+Problem-first, not tenant-first (`product.md` §9). Names and phone numbers only appear in the ticket detail.
+
+| Screen | Route | Content |
+|---|---|---|
+| **Portfolio** | `/dashboard` | List of buildings (name, address, units, open/resolved tickets). Custom problem bar: the landlord picks which stats are shown (open, overdue, emergencies, avg. time to fix), and buildings well above the portfolio average are flagged. "Message building" button |
+| **Building** | `/dashboard/buildings/[id]` | KPI bar. Pipeline of tickets by stage. Problem list ranked by urgency, then due time (issue, stage, urgency, overdue marker). Tenants list (secondary). Master message bar at the bottom → broadcast |
+| **Ticket detail** | `/dashboard/tickets/[id]` | Media and voice transcript, classification + urgency (editable), reporter (flat, name, contact), linked reports, technician + appointment, progress % (25/50/75/100 by stage), timeline, ticket messages. In manual mode: confirm / change the proposed appointment |
+| **Settings** | `/dashboard/settings` | Mode (automatic / manual), due times per urgency, quick-fix guides per building |
+| **Properties** | `/dashboard/buildings/new`, `/dashboard/buildings/[id]/invite` | Register buildings and units, generate the tenant invite link/code |
+
+**Due times:** each ticket gets `due_at` from its urgency on creation. Defaults follow the UK median repair targets (evidence Issue 12): **24 h for emergency and high, 28 days for medium and low**. They can be changed in Settings. The dashboard shows "due soon" and "overdue".
+
+**KPI bar** (`product.md` §13):
+
+| KPI | Computed from |
+|---|---|
+| **Time from issue to fix** (main KPI) | `resolved_at − occurred_at`. `occurred_at` is when the sensor event started, or when the tenant reported |
+| Open vs. resolved | Ticket status |
+| Overdue tickets | `due_at < now()` and not resolved |
+| Technician visits / missed appointments | `appointments`, `outcome = no_access` |
+| Handled without the landlord | Tickets with no landlord action (automatic mode, no edits). A stand-in for "time saved" |
+
+Costs and tenant retention are not measured in the MVP (no payments, no lease data).
+
+### 5.9 Onboarding
+
+1. The landlord signs up. The account gets a licence flag (no payment in the MVP).
+2. The landlord adds buildings and units (floor + position, e.g. 4B).
+3. Each building gets an **invite link with a code**: `/join/[code]`.
+4. The tenant opens the link, picks their apartment from the building's list, and creates an account (email, phone, password).
+5. The account is tied to that unit, so reports and sensor alerts are located automatically, and broadcasts and building-wide notices reach the right people.
+
+## 6. Pages and routes
+
+| Who | Route | Page |
+|---|---|---|
+| Tenant | `/join/[code]` | Sign-up from the invite link |
+| Tenant | `/app` | Home |
+| Tenant | `/app/new` | Add ticket |
+| Tenant | `/app/history` | History |
+| Tenant | `/app/messages` | Messages + chatbot |
+| Tenant | `/app/profile` | Profile |
+| Tenant | `/app/tickets/[id]` | Ticket progress, availability picker, appointment confirmation |
+| Landlord | `/dashboard`, `/dashboard/buildings/[id]`, `/dashboard/tickets/[id]`, `/dashboard/settings` | See §5.8 |
+| Technician | `/t/[token]` | Availability, jobs, status buttons (no login) |
+| Demo | `/demo` | Sensor event panel |
+| System | `/api/cron/reminders` | Called by Supabase Cron (protected with a shared secret) |
+
+After login, the user's role (`landlord` / `tenant`) sends them to `/dashboard` or `/app`.
+
+## 7. Data model
+
+Based on `product.md` §12, with three additions:
+- an `appointments` table, because a ticket can need several visits (follow-up, no access)
+- `ticket_events` for the timeline
+- `ai_calls` to log every AI call
 
 ```mermaid
 erDiagram
+    LANDLORD ||--o{ BUILDING : owns
     BUILDING ||--o{ UNIT : has
-    UNIT ||--o{ ROOM : has
-    UNIT ||--o{ TENANCY : has
-    PROFILE ||--o{ TENANCY : "tenant in"
-    ROOM ||--o{ DEVICE : has
-    DEVICE ||--o{ SENSOR_READING : emits
-    DEVICE ||--o{ ANOMALY : triggers
-    INCIDENT ||--o{ ANOMALY : groups
-    UNIT ||--o{ REPORT : "tenant reports"
-    TICKET }o--o| INCIDENT : from
-    TICKET }o--o| REPORT : from
-    TICKET ||--o{ TICKET_EVENT : timeline
-    TICKET ||--o| APPOINTMENT : has
+    UNIT ||--o{ TENANT : "lives in"
+    UNIT ||--o{ SENSOR_EVENT : has
+    UNIT ||--o{ REPORT : has
+    SENSOR_EVENT |o--o| REPORT : "confirmed into"
+    TICKET ||--o{ REPORT : groups
+    TICKET |o--o{ TICKET : "building ticket groups flat tickets"
+    TICKET ||--o{ APPOINTMENT : has
     TECHNICIAN ||--o{ APPOINTMENT : attends
+    TECHNICIAN ||--o{ TECH_SLOT : offers
+    TICKET ||--o{ TICKET_EVENT : timeline
+    TICKET ||--o{ MESSAGE : has
+    BUILDING ||--o{ BROADCAST : has
 ```
 
 | Table | Key columns |
 |---|---|
-| `profiles` | `role` (`tenant` / `landlord` / `technician`), `auto_approve` (landlords only) |
-| `buildings`, `units`, `rooms` | Including `floor` (used for grouping) |
-| `devices`, `sensor_readings` | `type`, `room_id`; readings are `device_id`, `ts`, `metric`, `value` |
-| `anomalies`, `incidents` | `rule`, `severity`, `evidence jsonb`, `tenant_confirmation`, `incident_id` |
-| `reports` | Note (typed or dictated), `note_source` (`typed` / `voice`), media paths, extracted frames, `started_at` / `submitted_at` |
-| `tickets` | Classification fields, `summary`, `status`, `source` (`sensor` / `tenant` / `chat`), `classified_by` (`jev` / `claude` / `landlord`), `due_at`, `acknowledged_at`, `resolved_at` |
-| `ticket_events` | Timeline entries, each with a `type` and an `actor`. Types include `status_query` (the tenant asked for an update), `label_corrected` (someone changed the AI's category or urgency, with old and new value) and `manual_contact` (the landlord called or messaged someone by hand) |
-| `technicians`, `availability`, `appointments` | In-app scheduling, `approved_by`, `tenant_confirmation` (`home` / `someone_else` / `reschedule`), `outcome` (`completed` / `needs_follow_up` / `no_access`) |
-| `ai_calls` | Provider, model, input/output, confidence, cost, latency |
+| `landlords` | `id`, `user_id`, `licence_active`, `mode` (`automatic` / `manual`), `due_hours` per urgency |
+| `buildings` | `id`, `landlord_id`, `name`, `address`, `invite_code` |
+| `units` | `id`, `building_id`, `floor`, `position`, `number` (e.g. "4B") |
+| `tenants` | `id`, `user_id`, `unit_id`, `name`, `email`, `phone` |
+| `technicians` | `id`, `name`, `trade`, `email`, `phone`, `link_token` |
+| `tech_slots` | `technician_id`, `starts_at`, `ends_at` |
+| `sensor_events` | `id`, `unit_id`, `metric`, `value`, `duration`, `occurred_at`, `confirmation` (`pending` / `yes` / `no`), `simulated = true` |
+| `reports` | `id`, `unit_id`, `tenant_id`, `source` (`tenant` / `sensor`), `sensor_event_id`, `text`, `transcript`, `media_paths`, `frame_paths`, `created_at`, `ticket_id` |
+| `tickets` | `id`, `building_id`, `unit_id` (null if building-wide), `parent_ticket_id`, classifier fields (`issue_type`, `room`, `scope`, `urgency`, `next_step`, `trade`, `quick_fix_text`, `summary`), `classified_by` (`jev` / `claude` / `landlord`), `status` (`logged` / `confirmed` / `quick_fix` / `booked` / `in_progress` / `resolved` / `dismissed`), `needs_triage`, `occurred_at`, `due_at`, `resolved_at` |
+| `appointments` | `id`, `ticket_id`, `technician_id`, `starts_at`, `ends_at`, `status` (`proposed` / `booked` / `cancelled` / `done`), `tenant_reply` (`home` / `someone_else` / `reschedule`), `outcome` (`completed` / `needs_follow_up` / `no_access`), `reminders_sent` |
+| `tenant_windows` | `ticket_id`, `tenant_id`, `starts_at`, `ends_at` (the tenant's availability for that ticket) |
+| `ticket_events` | `ticket_id`, `type`, `actor` (`ai` / `tenant` / `landlord` / `technician` / `system`), `data`, `created_at` |
+| `messages` | `id`, `ticket_id`, `from` (`ai` / `tenant` / `landlord` / `technician`), `text`, `created_at` |
+| `broadcasts` | `id`, `building_id`, `landlord_id`, `text`, `created_at` |
+| `ai_calls` | `provider`, `model`, `purpose`, `input_ref`, `output`, `confidence`, `cost`, `latency_ms` |
 
-## 7. Example flows
+## 8. Example flows
 
-**A. Sensor-detected heating fault**
+**A. Sensor path with building grouping** (demo script steps 7–10)
 
 ```mermaid
 sequenceDiagram
-    participant S as Simulator
-    participant R as Rules
-    participant T as Tenant
+    participant D as Demo panel
+    participant API as Next.js
+    participant T as Tenant 4B
     participant AI as Jev / Claude
-    participant L as Landlord
+    participant L as Dashboard
     participant M as Technician
-    S->>R: 15 °C for 6 h, valve 100 %, window closed
-    R->>T: "Is your living room cold?"
-    T-->>R: Yes + photo
-    R->>AI: classify → heating · high · heating_engineer
-    AI->>L: Ticket + proposed appointment
-    alt Confirm manually
-        L->>AI: Approve
-    else Auto-approve
-        AI->>L: Booked (info only)
-    end
-    AI->>T: "Booked Tue 10–12" (all tenants of the flat notified)
-    M->>L: Done + photo
-    S-->>R: Room back to 20 °C → ticket auto-verified
+    D->>API: sensor_event 4B · 15 °C · 6 h · radiator on
+    API->>T: Push "Is your room cold?"
+    T-->>API: Yes
+    API->>AI: classify → heating · high · schedule_technician · heating
+    API->>T: Pick when you're home
+    T-->>API: Windows
+    API->>M: Booking email + link (automatic mode)
+    API->>L: Ticket "booked" (Realtime)
+    D->>API: same event for 4A, 4C, 4D
+    API->>L: Merged into one building-wide boiler ticket
+    API->>T: Building status bar on every tenant's Home
 ```
 
-**B. Tenant photo of a leak:** photo + note "water dripping from bathroom ceiling" → Jev: `leak · critical · plumber` (confidence 0.93) → ticket + Claude summary → booked according to the landlord's approval setting.
+**B. Tenant voice memo, high priority** (demo script steps 3–6): the tenant records *"The pipe under my kitchen sink is dripping, there's water on the floor"* → the transcript is uploaded → "Received, we're on it" → classifier: `water · high · schedule_technician · plumber` → the flat below is notified → the tenant picks windows → a plumber is booked → the dashboard shows the new high-priority ticket and the KPI bar updates.
 
-**C. Quick fix:** photo of a radiator that is cold at the top → Jev: `self_fixable = yes` → chatbot guides the tenant through bleeding it → tenant marks it fixed → sensors confirm the room warming up → no ticket needed.
+**C. Low priority:** a photo of scraped paint → `defect · low · inform_landlord` → logged on the dashboard for the next planned visit, not in the urgent list. (Or `quick_fix` → the chatbot sends a touch-up guide.)
 
-## 8. Repository layout
+**D. Tenant says no:** sensor event → "Is your room cold?" → **No** → event dismissed, nothing reaches the landlord.
+
+**E. Missed visit:** reminder sent → no reply → the technician taps Done → `no_access` → the tenant gets the availability picker again, and the dashboard counts a missed appointment.
+
+## 9. Out of scope (MVP)
+
+As in `product.md` §6:
+- Real sensor hardware and integrations (simulated events only)
+- Shared-space issues (e.g. rubbish in common areas)
+- A technician app or technician accounts (only the link page in §5.7)
+- Payments, invoicing, rent and contracts
+- Cross-building ML prediction
+
+## 10. Repository layout
 
 ```
 /
-├─ apps/
-│  ├─ web/          # Next.js: tenant, landlord, technician views
-│  └─ worker/       # MQTT ingestion, anomaly rules, AI calls, ffmpeg
-├─ packages/
-│  ├─ db/           # Supabase migrations, seed data, generated types
-│  └─ ai/           # Jev questions, Claude prompts, Zod schemas, routing
-├─ tools/
-│  └─ sensor-sim/   # Simulator with fault scenarios
+├─ app/
+│  ├─ (tenant)/app/...       # Home, Add ticket, History, Messages, Profile
+│  ├─ (landlord)/dashboard/...
+│  ├─ join/[code]/           # Tenant onboarding
+│  ├─ t/[token]/             # Technician link page
+│  ├─ demo/                  # Sensor event panel
+│  └─ api/cron/reminders/
+├─ lib/
+│  ├─ ai/                    # Jev questions, Claude prompts, Zod schemas, routing, safety rules
+│  ├─ scheduling/            # Matching, booking, reminders
+│  ├─ grouping/              # Related tickets, building merge, neighbours
+│  └─ supabase/              # Clients, generated types
+├─ supabase/
+│  ├─ migrations/            # Schema + RLS policies
+│  └─ seed.sql               # Demo landlord, "Alexanderplatz 1", units, tenants, technicians
+├─ product.md
 ├─ architecture.md
-└─ evidence.md      # research: tenant and landlord issues 1–12
+└─ evidence.md
 ```
 
-## 9. Basic security & privacy
+## 11. Security & privacy
 
 - API keys live only in server-side environment variables, never in the browser.
-- Row-Level Security: tenants see their own flat, technicians see their assigned jobs, landlords see their own buildings.
-- Media is stored in a private bucket and served through short-lived signed URLs.
-- Only the minimum context is sent to Jev and Claude (no names or contact details).
-- All demo data is fake.
+- **Row-Level Security:**
+  - tenants see their own unit's tickets, building-wide tickets in their building, their building's broadcasts, and their own messages
+  - landlords see only their own buildings
+- **Technician pages** use a long random token and are served only through server code. Each page shows only that technician's jobs. Contact details are the minimum needed (flat, slot, tenant first name and phone).
+- Media sits in a private bucket and is served through short-lived signed URLs.
+- Only the minimum context goes to Jev and Claude (no names or contact details).
+- All demo data is fake. Data privacy for real in-flat sensors (GDPR/DSGVO, tenant consent) is an open question for after the MVP (`product.md` §15).
 
-## 10. Build plan
+## 12. Build plan
 
 | Step | Goal |
 |---|---|
-| 1 | Repo, Supabase schema, login with three roles, simulator → readings → charts |
-| 2 | Tenant reports (photo/video/voice/note) → Jev classification → instant acknowledgement → ticket board with due times |
-| 3 | Anomaly rules, tenant confirmation, incident grouping (sensor and tenant reports), building notices |
-| 4 | In-app scheduling, approval setting, roommate notifications, reminders, technician view with visit outcomes |
-| 5 | Quick-fix chatbot, sensor-verified resolution, headline metrics on the dashboard, demo script |
+| 1 | Next.js + Supabase setup, schema and RLS, seed data, landlord sign-up, buildings and units, invite link, tenant sign-up |
+| 2 | Tenant app shell (bottom nav), Add ticket (photo, video frames, voice transcript, text), "Received" confirmation, Home and History |
+| 3 | Classifier (safety rules → Jev → Claude), next-step handling, due times, Realtime progress |
+| 4 | Landlord dashboard: Portfolio, Building view with KPI bar and problem list, Ticket detail, Settings, broadcasts |
+| 5 | Demo panel, tenant confirmation, grouping into building-wide tickets, building status bar, neighbour notice |
+| 6 | Tenant availability, matching and booking, automatic/manual mode, technician link page, booking emails, roommate notices |
+| 7 | Reminders, visit outcomes and re-booking, chatbot with quick fixes and status answers, full run-through of the demo script |
